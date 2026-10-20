@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CIRCLE_OF_FIFTHS, getNoteIndex, NOTES } from '../data/musicData';
 
 interface CircleOfFifthsProps {
@@ -23,14 +23,31 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
   // Get relative minor for each major key
   const getRelativeMinor = (majorKey: string): string => {
     const idx = getNoteIndex(majorKey);
-    return NOTES[(idx + 9) % 12]; // 9 semitones up = relative minor
+    return NOTES[(idx + 9) % 12];
   };
 
-  const getAngle = (index: number): number => {
+  // Calculate rotation so selected key is at 12 o'clock (top)
+  const rotationDeg = useMemo(() => {
+    const selectedIndex = CIRCLE_OF_FIFTHS.indexOf(selectedKey);
+    if (selectedIndex === -1) return 0;
+    return -(selectedIndex * 30);
+  }, [selectedKey]);
+
+  const rotationRad = (rotationDeg * Math.PI) / 180;
+
+  const getBaseAngle = (index: number): number => {
     return (index * 30 - 90) * (Math.PI / 180);
   };
 
-  const getArcPath = (startAngle: number, endAngle: number, innerR: number, outerR: number): string => {
+  // Get angle with rotation applied
+  const getRotatedAngle = (index: number): number => {
+    return getBaseAngle(index) + rotationRad;
+  };
+
+  const getArcPath = (centerAngle: number, halfWidth: number, innerR: number, outerR: number): string => {
+    const startAngle = centerAngle - halfWidth;
+    const endAngle = centerAngle + halfWidth;
+    
     const startOuter = {
       x: cx + outerR * Math.cos(startAngle),
       y: cy + outerR * Math.sin(startAngle),
@@ -72,35 +89,87 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
     return highlightedNotes.includes(note);
   };
 
+  const halfSegment = Math.PI / 12;
+
   return (
     <div className="relative w-full max-w-[400px] mx-auto">
       <svg viewBox="0 0 400 400" className="w-full h-full drop-shadow-2xl">
         {/* Background circle */}
         <circle cx={cx} cy={cy} r={outerRadius + 5} fill="#1a1a2e" stroke="#2d2d44" strokeWidth="2" />
 
-        {/* Outer ring - Major keys */}
+        {/* Rotating segments group */}
+        <g
+          style={{
+            transform: `rotate(${rotationDeg}deg)`,
+            transformOrigin: `${cx}px ${cy}px`,
+            transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+        >
+          {/* Outer ring - Major keys (segments only) */}
+          {CIRCLE_OF_FIFTHS.map((key, i) => {
+            const baseAngle = getBaseAngle(i);
+            const selected = isSelected(key, 'major');
+            const highlighted = isHighlighted(key);
+
+            return (
+              <path
+                key={`major-seg-${i}`}
+                d={getArcPath(baseAngle, halfSegment, middleRadius, outerRadius)}
+                fill={selected ? '#FFD700' : highlighted ? 'rgba(255, 215, 0, 0.25)' : '#2d2d44'}
+                stroke={selected ? '#FFD700' : '#3d3d5c'}
+                strokeWidth={selected ? 2.5 : 1}
+                onClick={() => handleSegmentClick(i, 'major')}
+                className="cursor-pointer hover:brightness-125 transition-all duration-200"
+              />
+            );
+          })}
+
+          {/* Inner ring - Minor keys (segments only) */}
+          {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
+            const minorKey = getRelativeMinor(majorKey);
+            const baseAngle = getBaseAngle(i);
+            const selected = isSelected(minorKey, 'minor');
+            const highlighted = isHighlighted(minorKey);
+
+            return (
+              <path
+                key={`minor-seg-${i}`}
+                d={getArcPath(baseAngle, halfSegment, innerRadius, middleRadius)}
+                fill={selected ? '#4ECDC4' : highlighted ? 'rgba(78, 205, 196, 0.25)' : '#1f1f35'}
+                stroke={selected ? '#4ECDC4' : '#2d2d44'}
+                strokeWidth={selected ? 2.5 : 1}
+                onClick={() => handleSegmentClick(i, 'minor')}
+                className="cursor-pointer hover:brightness-125 transition-all duration-200"
+              />
+            );
+          })}
+        </g>
+
+        {/* Text labels - positioned with transform for smooth animation */}
+        {/* Major key labels */}
         {CIRCLE_OF_FIFTHS.map((key, i) => {
-          const startAngle = getAngle(i) - Math.PI / 12;
-          const endAngle = getAngle(i) + Math.PI / 12;
+          const rotatedAngle = getRotatedAngle(i);
+          const labelRadius = (outerRadius + middleRadius) / 2;
+          const x = cx + labelRadius * Math.cos(rotatedAngle);
+          const y = cy + labelRadius * Math.sin(rotatedAngle);
           const selected = isSelected(key, 'major');
           const highlighted = isHighlighted(key);
 
           return (
-            <g key={`major-${i}`} onClick={() => handleSegmentClick(i, 'major')} className="cursor-pointer">
-              <path
-                d={getArcPath(startAngle, endAngle, middleRadius, outerRadius)}
-                fill={selected ? '#FFD700' : highlighted ? 'rgba(255, 215, 0, 0.3)' : '#2d2d44'}
-                stroke={selected ? '#FFD700' : '#3d3d5c'}
-                strokeWidth={selected ? 2 : 1}
-                className="transition-all duration-200 hover:fill-[#3d3d5c]"
-              />
+            <g
+              key={`major-text-${i}`}
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
               <text
-                x={cx + ((outerRadius + middleRadius) / 2) * Math.cos(getAngle(i))}
-                y={cy + ((outerRadius + middleRadius) / 2) * Math.sin(getAngle(i))}
+                x={0}
+                y={0}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill={selected ? '#1a1a2e' : highlighted ? '#FFD700' : '#e0e0e0'}
-                fontSize={selected ? '16' : '14'}
+                fontSize={selected ? '17' : '14'}
                 fontWeight={selected || highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
@@ -110,26 +179,27 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
           );
         })}
 
-        {/* Inner ring - Minor keys */}
+        {/* Minor key labels */}
         {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
           const minorKey = getRelativeMinor(majorKey);
-          const startAngle = getAngle(i) - Math.PI / 12;
-          const endAngle = getAngle(i) + Math.PI / 12;
+          const rotatedAngle = getRotatedAngle(i);
+          const labelRadius = (middleRadius + innerRadius) / 2;
+          const x = cx + labelRadius * Math.cos(rotatedAngle);
+          const y = cy + labelRadius * Math.sin(rotatedAngle);
           const selected = isSelected(minorKey, 'minor');
           const highlighted = isHighlighted(minorKey);
 
           return (
-            <g key={`minor-${i}`} onClick={() => handleSegmentClick(i, 'minor')} className="cursor-pointer">
-              <path
-                d={getArcPath(startAngle, endAngle, innerRadius, middleRadius)}
-                fill={selected ? '#4ECDC4' : highlighted ? 'rgba(78, 205, 196, 0.3)' : '#1f1f35'}
-                stroke={selected ? '#4ECDC4' : '#2d2d44'}
-                strokeWidth={selected ? 2 : 1}
-                className="transition-all duration-200 hover:fill-[#2d2d44]"
-              />
+            <g
+              key={`minor-text-${i}`}
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
               <text
-                x={cx + ((middleRadius + innerRadius) / 2) * Math.cos(getAngle(i))}
-                y={cy + ((middleRadius + innerRadius) / 2) * Math.sin(getAngle(i))}
+                x={0}
+                y={0}
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill={selected ? '#1a1a2e' : highlighted ? '#4ECDC4' : '#a0a0a0'}
@@ -143,15 +213,23 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
           );
         })}
 
-        {/* Center circle with info */}
+        {/* Center circle with info (does not rotate) */}
         <circle cx={cx} cy={cy} r={innerRadius - 5} fill="#16162a" stroke="#2d2d44" strokeWidth="1" />
+        
+        {/* Triangle pointer at top */}
+        <polygon
+          points={`${cx},${cy - innerRadius + 8} ${cx - 7},${cy - innerRadius - 3} ${cx + 7},${cy - innerRadius - 3}`}
+          fill={keyType === 'major' ? '#FFD700' : '#4ECDC4'}
+          opacity="0.9"
+        />
+        
         <text
           x={cx}
           y={cy - 15}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={keyType === 'major' ? '#FFD700' : '#4ECDC4'}
-          fontSize="22"
+          fontSize="24"
           fontWeight="bold"
         >
           {selectedKey}{keyType === 'minor' ? 'm' : ''}
