@@ -54,7 +54,7 @@ git push origin v1.0.0
 ```
 1. 📥 Checkout repository
 2. 🔧 Setup Node.js 20
-3. ☕ Setup Java JDK 17
+3. ☕ Setup Java JDK 21
 4. 🤖 Configure Android SDK (встроенный)
 5. 📥 Install npm dependencies
 6. 🏗️ Build web app (Vite)

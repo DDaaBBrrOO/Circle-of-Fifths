@@ -44,7 +44,7 @@ APK автоматически собирается при:
 
 - Node.js 20+
 - npm 10+
-- Java JDK 17+
+- Java JDK 21+ (Capacitor требует Java 21)
 - Android SDK (API 34)
 
 ### Установка

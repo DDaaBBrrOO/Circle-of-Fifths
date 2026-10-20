@@ -1,5 +1,40 @@
 # 🔧 Troubleshooting — Android APK Build
 
+## Ошибка: `invalid source release: 21`
+
+### Проблема
+```
+error: invalid source release: 21
+Execution failed for task ':capacitor-android:compileDebugJavaWithJavac'
+```
+
+### Причина
+Capacitor требует **Java 21**, но в workflow установлена более старая версия (например, Java 17).
+
+### Решение
+Обновите версию Java в `.github/workflows/build-apk.yml`:
+
+```yaml
+env:
+  NODE_VERSION: '20'
+  JAVA_VERSION: '21'  # ← Измените с 17 на 21
+```
+
+### Локальная разработка
+Убедитесь, что у вас установлена Java 21:
+
+```bash
+# Проверьте версию
+java -version
+
+# Если нужна Java 21, установите через SDKMAN
+curl -s "https://get.sdkman.io" | bash
+sdk install java 21.0.2-zulu
+sdk use java 21.0.2-zulu
+```
+
+---
+
 ## Ошибка: Gradle build failed
 
 ### Проблема: `BUILD FAILED in 56s`
