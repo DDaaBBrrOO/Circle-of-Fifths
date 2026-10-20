@@ -20,10 +20,10 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
 }) => {
   const cx = 200;
   const cy = 200;
-  const outerRadius = 180;
-  const middleRadius = 140;
-  const innerRadius = 100;
-  const innermostRadius = 65;
+  const outerRadius = 190;
+  const middleRadius = 150;
+  const innerRadius = 110;
+  const innermostRadius = 55;
 
   // Get relative minor for each major key
   const getRelativeMinor = (majorKey: string): string => {
@@ -287,14 +287,14 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill={isSelected ? '#1a1a2e' : highlight.highlighted ? '#FFD700' : '#e0e0e0'}
-                fontSize={isSelected ? '17' : '14'}
+                fontSize={isSelected ? '18' : '15'}
                 fontWeight={isSelected || highlight.highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
                 {key}
                 {highlight.highlighted && (
                   <tspan
-                    fontSize="9"
+                    fontSize="10"
                     dx="2"
                     dy="3"
                     fill={isSelected ? '#1a1a2e' : '#FFD700'}
@@ -332,14 +332,14 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill={isSelected ? '#1a1a2e' : highlight.highlighted ? '#4ECDC4' : '#a0a0a0'}
-                fontSize={isSelected ? '13' : '11'}
+                fontSize={isSelected ? '14' : '12'}
                 fontWeight={isSelected || highlight.highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
                 {minorKey}m
                 {highlight.highlighted && (
                   <tspan
-                    fontSize="8"
+                    fontSize="9"
                     dx="2"
                     dy="2"
                     fill={isSelected ? '#1a1a2e' : '#4ECDC4'}
@@ -376,14 +376,14 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 fill={highlight.highlighted ? '#E74C3C' : '#888'}
-                fontSize="9"
+                fontSize="10"
                 fontWeight={highlight.highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
                 {dimChord}
                 {highlight.highlighted && (
                   <tspan
-                    fontSize="7"
+                    fontSize="8"
                     dx="1"
                     dy="2"
                     fill="#E74C3C"
@@ -409,22 +409,22 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
         
         <text
           x={cx}
-          y={cy - 10}
+          y={cy - 8}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={keyType === 'major' ? '#FFD700' : '#4ECDC4'}
-          fontSize="20"
+          fontSize="22"
           fontWeight="bold"
         >
           {formatKeyName(selectedKey)}{keyType === 'minor' ? 'm' : ''}
         </text>
         <text
           x={cx}
-          y={cy + 10}
+          y={cy + 12}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="#888"
-          fontSize="10"
+          fontSize="11"
         >
           {keyType === 'major' ? 'Major' : 'Minor'}
         </text>

@@ -1,21 +1,19 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background - same dark navy as app -->
-  <rect width="512" height="512" rx="64" fill="#0f0f1e"/>
+  <!-- Background circle - solid dark navy -->
+  <circle cx="256" cy="256" r="256" fill="#0f0f1e"/>
   
   <!-- Outer circle - same proportions as navbar icon -->
-  <!-- Navbar: cx=12 cy=12 r=10 in 24x24 viewbox => scale 512/24 = 21.333 -->
-  <!-- r=10 * 21.333 = 213.33, centered at 256 -->
   <circle cx="256" cy="256" r="180" fill="none" stroke="#FFD700" stroke-width="22"/>
   
-  <!-- Inner circle - r=6 * 21.333 = 128 -->
+  <!-- Inner circle -->
   <circle cx="256" cy="256" r="108" fill="none" stroke="#FFD700" stroke-width="16"/>
   
-  <!-- Top line - from y=2 to y=6 in navbar => y=42.67 to y=128 in 512 -->
+  <!-- Top line -->
   <line x1="256" y1="42" x2="256" y2="128" stroke="#FFD700" stroke-width="16" stroke-linecap="round"/>
   
-  <!-- Bottom line - from y=18 to y=22 in navbar => y=384 to y=469.33 -->
+  <!-- Bottom line -->
   <line x1="256" y1="384" x2="256" y2="470" stroke="#FFD700" stroke-width="16" stroke-linecap="round"/>
   
-  <!-- Center dot (like the ♭ symbol in navbar) -->
+  <!-- Center dot -->
   <circle cx="256" cy="256" r="28" fill="#FFD700"/>
 </svg>
