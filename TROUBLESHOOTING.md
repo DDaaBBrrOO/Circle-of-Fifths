@@ -65,6 +65,45 @@ printf "\nconfigurations.all {\n    resolutionStrategy {\n        force \"org.je
 
 ---
 
+## Ошибка: `Resource not accessible by integration` при создании Release
+
+### Проблема
+```
+⚠️ Unexpected error fetching GitHub release for tag refs/tags/v1.0.0: 
+HttpError: Resource not accessible by integration
+```
+
+### Причина
+GitHub Actions по умолчанию имеет ограниченные права для `GITHUB_TOKEN`. Для создания релизов нужны явные права на запись в `contents`.
+
+### Решение
+Добавьте `permissions` в job:
+
+```yaml
+jobs:
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write  # ← Добавьте эту строку
+```
+
+Также используйте `token` вместо `env` в action:
+```yaml
+# ❌ Неправильно:
+- uses: softprops/action-gh-release@v2
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# ✅ Правильно:
+- uses: softprops/action-gh-release@v2
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+---
+
 ## Ошибка: `Duplicate class kotlin.collections.jdk8.CollectionsJDK8Kt`
 
 ### Проблема
