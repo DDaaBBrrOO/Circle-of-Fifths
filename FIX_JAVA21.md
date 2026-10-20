@@ -16,7 +16,7 @@ Capacitor (последняя версия) требует **Java 21** для к
 
 ```yaml
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   JAVA_VERSION: '21'  # ← Было: '17'
 ```
 

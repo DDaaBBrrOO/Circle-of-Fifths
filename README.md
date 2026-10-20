@@ -42,7 +42,7 @@ APK автоматически собирается при:
 
 ### Требования
 
-- Node.js 20+
+- Node.js 22+
 - npm 10+
 - Java JDK 21+ (Capacitor требует Java 21)
 - Android SDK (API 34)
@@ -172,8 +172,8 @@ ANDROID_KEY_PASSWORD=your_key_password
 
 ```yaml
 env:
-  NODE_VERSION: '20'        # Версия Node.js
-  JAVA_VERSION: '17'        # Версия Java
+  NODE_VERSION: '22'        # Версия Node.js
+  JAVA_VERSION: '21'        # Версия Java
   ANDROID_API_LEVEL: '34'   # Целевой API Android
   ANDROID_BUILD_TOOLS: '34.0.0'  # Версия Build Tools
 ```
