@@ -1,0 +1,422 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type (debug/release)'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+env:
+  NODE_VERSION: '20'
+  JAVA_VERSION: '21'
+
+jobs:
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # 1. Checkout repository
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      # 3. Setup Java JDK
+      - name: ☕ Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      # 4. Android SDK is pre-installed on ubuntu-latest
+      - name: 🤖 Configure Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          
+          # Accept all licenses
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          
+          # Install required platform and build tools
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "platform-tools"
+
+      # 5. Install npm dependencies
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      # 6. Build web application
+      - name: 🏗️ Build web app
+        run: |
+          npm run build
+          echo "✅ Web build completed"
+          ls -lh dist/
+
+      # 7. Install Capacitor
+      - name: 🔌 Install Capacitor
+        run: |
+          npm install --save @capacitor/core @capacitor/cli @capacitor/android
+          echo "✅ Capacitor installed"
+          npx cap --version
+
+      # 8. Initialize Capacitor and add Android platform
+      - name: 📱 Initialize Capacitor
+        run: |
+          # Initialize Capacitor if not already done
+          if [ ! -f "capacitor.config.ts" ]; then
+            echo "❌ capacitor.config.ts not found!"
+            exit 1
+          fi
+          
+          # Remove android directory if exists to start fresh
+          rm -rf android
+          
+          # Add Android platform
+          npx cap add android
+          echo "✅ Android platform added"
+          ls -la android/
+
+      # 9. Sync web assets to native project
+      - name: 🔄 Sync Capacitor
+        run: |
+          npx cap sync android
+          echo "✅ Capacitor sync completed"
+          
+          # Verify sync
+          if [ ! -d "android/app/src/main/assets/public" ]; then
+            echo "❌ Web assets not synced properly!"
+            exit 1
+          fi
+          echo "✅ Web assets verified"
+
+      # 10. Make gradlew executable
+      - name: 🔐 Make gradlew executable
+        run: chmod +x android/gradlew
+
+      # 11. Create local.properties for Android SDK path
+      - name: 📝 Configure Android SDK path
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "✅ local.properties created"
+          cat android/local.properties
+          
+          # Copy custom gradle.properties for better memory settings
+          if [ -f "android-gradle.properties" ]; then
+            cp android-gradle.properties android/gradle.properties
+            echo "✅ Custom gradle.properties applied"
+          fi
+
+      # 12. Fix common Capacitor issues and Kotlin conflicts
+      - name: 🔧 Fix common Capacitor issues
+        run: |
+          cd android
+          
+          echo "=== Checking for common issues ==="
+          
+          # Fix: Ensure compileSdk and targetSdk are set correctly
+          if grep -q "compileSdkVersion" app/build.gradle 2>/dev/null; then
+            echo "✅ compileSdkVersion found"
+          else
+            echo "⚠️  compileSdkVersion not found, may cause issues"
+          fi
+          
+          # Fix: Ensure minSdkVersion is compatible
+          if grep -q "minSdkVersion" app/build.gradle 2>/dev/null; then
+            MIN_SDK=$(grep "minSdkVersion" app/build.gradle | grep -oE '[0-9]+' | head -1)
+            if [ -n "$MIN_SDK" ]; then
+              echo "✅ minSdkVersion: $MIN_SDK"
+              if [ "$MIN_SDK" -lt 22 ]; then
+                echo "⚠️  minSdkVersion is too low, updating to 22"
+                sed -i 's/minSdkVersion [0-9]*/minSdkVersion 22/' app/build.gradle
+              fi
+            else
+              echo "⚠️  Could not parse minSdkVersion"
+            fi
+          else
+            echo "⚠️  minSdkVersion not found"
+          fi
+          
+          # Fix: Ensure namespace is set (required for AGP 8+)
+          if ! grep -q "namespace" app/build.gradle 2>/dev/null && ! grep -q "namespace" app/build.gradle.kts 2>/dev/null; then
+            echo "⚠️  namespace not found, adding it"
+            if [ -f "app/build.gradle" ]; then
+              sed -i '/android {/a\    namespace "com.circleoffifths.guitar"' app/build.gradle
+            fi
+          else
+            echo "✅ namespace found"
+          fi
+          
+          # Fix: Resolve Kotlin stdlib duplicate classes conflict
+          # Starting from Kotlin 1.8, jdk7 and jdk8 modules were merged into main kotlin-stdlib
+          # But some dependencies still pull old versions, causing duplicate class errors
+          echo ""
+          echo "=== Fixing Kotlin stdlib conflicts ==="
+          
+          if [ -f "app/build.gradle" ]; then
+            # Add resolution strategy to force consistent Kotlin versions
+            # and exclude old jdk7/jdk8 modules
+            cat >> app/build.gradle << 'EOF'
+
+// Fix Kotlin stdlib duplicate classes conflict
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+    }
+}
+EOF
+            echo "✅ Kotlin stdlib conflict resolution added"
+          fi
+          
+          echo "✅ Common issues check completed"
+          
+          # Clean build directory
+          echo ""
+          echo "=== Cleaning build directory ==="
+          rm -rf app/build
+          rm -rf build
+          rm -rf .gradle
+          echo "✅ Build directory cleaned"
+          
+          echo ""
+          echo "=== Android project structure ==="
+          find . -maxdepth 4 -type f \( -name "*.gradle" -o -name "*.properties" -o -name "*.xml" \) | grep -v ".gradle/" | sort
+
+      # 13. Check Gradle version and dependencies
+      - name: 🔍 Check Gradle configuration
+        run: |
+          cd android
+          echo "=== Gradle Version ==="
+          ./gradlew --version
+          
+          echo ""
+          echo "=== Project Structure ==="
+          find . -maxdepth 3 \( -name "build.gradle*" -o -name "settings.gradle*" -o -name "gradle.properties" \) | grep -v ".gradle/"
+          
+          echo ""
+          echo "=== Root build.gradle ==="
+          cat build.gradle 2>/dev/null || cat build.gradle.kts 2>/dev/null || echo "No root build.gradle found"
+          
+          echo ""
+          echo "=== App build.gradle ==="
+          cat app/build.gradle 2>/dev/null || cat app/build.gradle.kts 2>/dev/null || echo "No app/build.gradle found"
+          
+          echo ""
+          echo "=== gradle.properties ==="
+          cat gradle.properties 2>/dev/null || echo "No gradle.properties found"
+          
+          echo ""
+          echo "=== Capacitor Variables ==="
+          cat variables.gradle 2>/dev/null || echo "variables.gradle not found"
+          
+          echo ""
+          echo "=== Check web assets ==="
+          if [ -d "app/src/main/assets/public" ]; then
+            echo "✅ Web assets directory exists"
+            ls -lh app/src/main/assets/public/ | head -20
+          else
+            echo "❌ Web assets not found!"
+            echo "Checking alternative locations..."
+            find app/src/main -type d -name "public" 2>/dev/null || echo "No public directory found"
+          fi
+          
+          echo ""
+          echo "=== Check AndroidManifest.xml ==="
+          if [ -f "app/src/main/AndroidManifest.xml" ]; then
+            echo "✅ AndroidManifest.xml exists"
+            head -30 app/src/main/AndroidManifest.xml
+          else
+            echo "❌ AndroidManifest.xml not found!"
+          fi
+          
+          echo ""
+          echo "=== Environment Variables ==="
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "PATH: $PATH"
+          
+          echo ""
+          echo "=== Java Version ==="
+          java -version
+          
+          echo ""
+          echo "=== Gradle Wrapper Properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties 2>/dev/null || echo "No gradle-wrapper.properties found"
+
+      # 14. Pre-build diagnostics
+      - name: 🔍 Pre-build diagnostics
+        run: |
+          cd android
+          
+          echo "=== Available Gradle Tasks ==="
+          ./gradlew tasks --no-daemon 2>&1 | head -100
+          
+          echo ""
+          echo "=== Project Dependencies ==="
+          ./gradlew app:dependencies --configuration debugCompileClasspath --no-daemon 2>&1 | head -150
+          
+          echo ""
+          echo "=== Build Variants ==="
+          ./gradlew app:tasks --group="build" --no-daemon 2>&1 | grep -i assemble || echo "No assemble tasks found"
+          
+          echo ""
+          echo "=== Dry Run Build ==="
+          ./gradlew assembleDebug --dry-run --no-daemon 2>&1 | tail -50
+
+      # 15. Build APK with detailed logging
+      - name: 🔨 Build APK
+        run: |
+          cd android
+          
+          BUILD_TYPE="${{ github.event.inputs.build_type }}"
+          if [ -z "$BUILD_TYPE" ]; then
+            BUILD_TYPE="debug"
+          fi
+          
+          echo "=========================================="
+          echo "Building $BUILD_TYPE APK"
+          echo "=========================================="
+          echo ""
+          
+          # Try to build with maximum verbosity
+          if [ "$BUILD_TYPE" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            ./gradlew assembleRelease --no-daemon --stacktrace --warning-mode all --no-build-cache 2>&1 | tee gradle-build.log
+            BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          else
+            ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all --no-build-cache 2>&1 | tee gradle-build.log
+            BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          fi
+          
+          echo ""
+          echo "=========================================="
+          echo "Build exit code: $BUILD_EXIT_CODE"
+          echo "=========================================="
+          
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "❌ Build failed!"
+            echo ""
+            echo "=== Last 200 lines of build log ==="
+            tail -200 gradle-build.log
+            echo ""
+            echo "=== Searching for ERROR in log ==="
+            grep -i "error\|failed\|exception" gradle-build.log | tail -50
+            exit 1
+          fi
+          
+          echo "✅ Build completed successfully"
+
+      # 16. Find APK file
+      - name: 🔍 Locate APK
+        id: find_apk
+        run: |
+          echo "=== Searching for APK files ==="
+          
+          if [ "${{ github.event.inputs.build_type }}" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" -type f | head -1)
+          else
+            APK_PATH=$(find android/app/build/outputs/apk/debug -name "*.apk" -type f | head -1)
+          fi
+          
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ APK file not found!"
+            echo ""
+            echo "=== All files in build/outputs ==="
+            find android/app/build/outputs -type f 2>/dev/null || echo "outputs directory not found"
+            
+            echo ""
+            echo "=== Build directory structure ==="
+            ls -laR android/app/build/ 2>/dev/null | head -100 || echo "build directory not found"
+            
+            echo ""
+            echo "=== Last 200 lines of Gradle log ==="
+            tail -200 android/gradle-build.log 2>/dev/null || echo "No gradle log found"
+            
+            echo ""
+            echo "=== Error lines from log ==="
+            grep -i "error\|failed\|exception" android/gradle-build.log 2>/dev/null | tail -50 || echo "No errors found in log"
+            
+            exit 1
+          fi
+          
+          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "✅ APK found at: $APK_PATH"
+          ls -lh "$APK_PATH"
+
+      # 17. Upload APK as artifact
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: circle-of-fifths-apk
+          path: ${{ steps.find_apk.outputs.apk_path }}
+          retention-days: 30
+          if-no-files-found: error
+
+      # 18. Upload Gradle logs (always)
+      - name: 📤 Upload Gradle logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-logs
+          path: |
+            android/gradle-build.log
+            android/app/build/reports/
+            android/app/build.gradle
+            android/build.gradle
+            android/gradle.properties
+          retention-days: 7
+          if-no-files-found: warn
+
+      # 19. Create Release on tag push
+      - name: 🚀 Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.find_apk.outputs.apk_path }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 20. Summary
+      - name: 📊 Build Summary
+        if: always()
+        run: |
+          echo "## 🎸 Circle of Fifths — APK Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Node.js** | ${{ env.NODE_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Java** | ${{ env.JAVA_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Build Type** | ${{ github.event.inputs.build_type || 'debug' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "${{ steps.find_apk.outputs.apk_path }}" ]; then
+            APK_SIZE=$(du -h "${{ steps.find_apk.outputs.apk_path }}" | cut -f1)
+            echo "✅ **APK built successfully** — Size: $APK_SIZE" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **APK build failed** — Check logs for details" >> $GITHUB_STEP_SUMMARY
+          fi
