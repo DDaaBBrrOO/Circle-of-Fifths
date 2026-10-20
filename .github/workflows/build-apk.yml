@@ -98,6 +98,23 @@ jobs:
           echo "✅ Android platform added"
           ls -la android/
 
+      # 8.5. Setup app icon
+      - name: 🎨 Setup App Icon
+        run: |
+          echo "🎨 Setting up app icon..."
+          
+          # Remove any old SVG files that might cause build errors
+          rm -f android/app/src/main/res/drawable/ic_launcher_foreground.svg
+          rm -f android/app/src/main/res/drawable/ic_launcher_background.svg
+          
+          # Check if we have SVG source
+          if [ -f "public/icon.svg" ]; then
+            echo "📐 Converting SVG icon to PNG using Node.js..."
+            node scripts/generate-icons.js
+          else
+            echo "⚠️  No icon.svg found, using default Capacitor icons"
+          fi
+
       # 9. Sync web assets to native project
       - name: 🔄 Sync Capacitor
         run: |

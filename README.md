@@ -95,6 +95,25 @@ npm run build
 npx cap sync android
 ```
 
+### Установка иконки приложения
+
+Иконка приложения автоматически генерируется из `public/icon.svg` при сборке через GitHub Actions.
+
+Для локальной установки иконки:
+
+```bash
+# Сгенерируйте иконки всех размеров
+node scripts/generate-icons.js
+
+# Или используйте скрипт установки
+chmod +x scripts/setup-icon.sh
+./scripts/setup-icon.sh
+```
+
+Скрипт создаст иконки для всех плотностей экрана (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi) и настроит Adaptive Icon для Android 8.0+.
+
+Подробная документация: [docs/ICON_SETUP.md](docs/ICON_SETUP.md)
+
 ## 📂 Структура проекта
 
 ```
