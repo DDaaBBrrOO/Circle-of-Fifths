@@ -1,45 +1,21 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="512" height="512" fill="#0f0f1e"/>
+  <!-- Background - same dark navy as app -->
+  <rect width="512" height="512" rx="64" fill="#0f0f1e"/>
   
-  <!-- Outer circle -->
-  <circle cx="256" cy="256" r="200" fill="none" stroke="#FFD700" stroke-width="4"/>
+  <!-- Outer circle - same proportions as navbar icon -->
+  <!-- Navbar: cx=12 cy=12 r=10 in 24x24 viewbox => scale 512/24 = 21.333 -->
+  <!-- r=10 * 21.333 = 213.33, centered at 256 -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#FFD700" stroke-width="22"/>
   
-  <!-- Inner circle -->
-  <circle cx="256" cy="256" r="140" fill="none" stroke="#FFD700" stroke-width="3"/>
+  <!-- Inner circle - r=6 * 21.333 = 128 -->
+  <circle cx="256" cy="256" r="108" fill="none" stroke="#FFD700" stroke-width="16"/>
   
-  <!-- Radial lines dividing into 12 segments -->
-  <g stroke="#FFD700" stroke-width="2" opacity="0.6">
-    <line x1="256" y1="56" x2="256" y2="116"/>
-    <line x1="356" y1="106" x2="326" y2="158"/>
-    <line x1="426" y1="206" x2="376" y2="226"/>
-    <line x1="426" y1="306" x2="376" y2="286"/>
-    <line x1="356" y1="406" x2="326" y2="354"/>
-    <line x1="256" y1="456" x2="256" y2="396"/>
-    <line x1="156" y1="406" x2="186" y2="354"/>
-    <line x1="86" y1="306" x2="136" y2="286"/>
-    <line x1="86" y1="206" x2="136" y2="226"/>
-    <line x1="156" y1="106" x2="186" y2="158"/>
-  </g>
+  <!-- Top line - from y=2 to y=6 in navbar => y=42.67 to y=128 in 512 -->
+  <line x1="256" y1="42" x2="256" y2="128" stroke="#FFD700" stroke-width="16" stroke-linecap="round"/>
   
-  <!-- Musical notes (simplified as dots) -->
-  <g fill="#FFD700">
-    <circle cx="256" cy="96" r="8"/>
-    <circle cx="336" cy="136" r="8"/>
-    <circle cx="396" cy="216" r="8"/>
-    <circle cx="396" cy="296" r="8"/>
-    <circle cx="336" cy="376" r="8"/>
-    <circle cx="256" cy="416" r="8"/>
-    <circle cx="176" cy="376" r="8"/>
-    <circle cx="116" cy="296" r="8"/>
-    <circle cx="116" cy="216" r="8"/>
-    <circle cx="176" cy="136" r="8"/>
-  </g>
+  <!-- Bottom line - from y=18 to y=22 in navbar => y=384 to y=469.33 -->
+  <line x1="256" y1="384" x2="256" y2="470" stroke="#FFD700" stroke-width="16" stroke-linecap="round"/>
   
-  <!-- Center circle -->
-  <circle cx="256" cy="256" r="60" fill="#1a1a2e" stroke="#FFD700" stroke-width="2"/>
-  
-  <!-- Center text -->
-  <text x="256" y="246" text-anchor="middle" fill="#FFD700" font-size="32" font-weight="bold" font-family="Arial, sans-serif">♭</text>
-  <text x="256" y="276" text-anchor="middle" fill="#FFD700" font-size="14" font-family="Arial, sans-serif">Circle</text>
+  <!-- Center dot (like the ♭ symbol in navbar) -->
+  <circle cx="256" cy="256" r="28" fill="#FFD700"/>
 </svg>
