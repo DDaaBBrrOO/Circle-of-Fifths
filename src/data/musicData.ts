@@ -16,6 +16,25 @@ export function getNoteIndex(note: string): number {
   return NOTE_FLATS.indexOf(note);
 }
 
+// Normalize note name to match circle of fifths naming
+export function normalizeNoteName(note: string): string {
+  const idx = getNoteIndex(note);
+  if (idx === -1) return note;
+  
+  // Use the same naming as CIRCLE_OF_FIFTHS
+  const circleNotes = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+  return circleNotes[idx];
+}
+
+// Format key name with proper case (e.g., "Db" not "DB")
+export function formatKeyName(key: string): string {
+  if (key.length === 1) return key.toUpperCase();
+  if (key.length === 2) {
+    return key[0].toUpperCase() + key[1].toLowerCase();
+  }
+  return key;
+}
+
 // Get notes of a scale
 export function getScaleNotes(root: string, type: 'major' | 'minor'): string[] {
   const rootIdx = getNoteIndex(root);

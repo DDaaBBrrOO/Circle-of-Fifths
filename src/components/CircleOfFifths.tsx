@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { CIRCLE_OF_FIFTHS, getNoteIndex, NOTES, getScaleNotes } from '../data/musicData';
+import { CIRCLE_OF_FIFTHS, getNoteIndex, NOTES, getScaleNotes, normalizeNoteName, formatKeyName } from '../data/musicData';
 
 interface CircleOfFifthsProps {
   selectedKey: string;
@@ -131,7 +131,31 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
 
   // Check if a chord is in the current diatonic scale
   const getChordHighlight = (chordName: string, type: 'major' | 'minor' | 'dim'): { highlighted: boolean; roman: string; color: string } => {
-    const diatonic = diatonicChords.find(d => d.name === chordName);
+    // Normalize the chord name to handle enharmonic equivalents
+    const normalizeChordName = (name: string): string => {
+      // Extract the root note (everything before 'm' or '°')
+      let root = name;
+      let suffix = '';
+      
+      if (name.endsWith('°')) {
+        root = name.slice(0, -1);
+        suffix = '°';
+      } else if (name.endsWith('m')) {
+        root = name.slice(0, -1);
+        suffix = 'm';
+      }
+      
+      // Normalize the root note
+      const normalizedRoot = normalizeNoteName(root);
+      return normalizedRoot + suffix;
+    };
+    
+    const normalizedChordName = normalizeChordName(chordName);
+    const diatonic = diatonicChords.find(d => {
+      const normalizedDiatonic = normalizeChordName(d.name);
+      return normalizedDiatonic === normalizedChordName;
+    });
+    
     if (diatonic) {
       let color = '#2d2d44';
       if (diatonic.quality === 'maj' && diatonic.roman !== 'I' && diatonic.roman !== 'i') {
@@ -392,7 +416,7 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
           fontSize="20"
           fontWeight="bold"
         >
-          {selectedKey}{keyType === 'minor' ? 'm' : ''}
+          {formatKeyName(selectedKey)}{keyType === 'minor' ? 'm' : ''}
         </text>
         <text
           x={cx}

@@ -3,7 +3,7 @@ import CircleOfFifths from './components/CircleOfFifths';
 import GuitarNeck from './components/GuitarNeck';
 import TheorySection from './components/TheorySection';
 import HelpSection from './components/HelpSection';
-import { getDiatonicChords, getScaleNotes, getChordShapes, ChordShape } from './data/musicData';
+import { getDiatonicChords, getScaleNotes, getChordShapes, ChordShape, formatKeyName } from './data/musicData';
 import { Language, translations } from './data/translations';
 
 type TabType = 'main' | 'theory' | 'help';
@@ -156,7 +156,7 @@ function App() {
               <div className="flex items-center gap-2 mb-2">
                 <div className={`w-1.5 h-1.5 rounded-full ${keyType === 'major' ? 'bg-yellow-400' : 'bg-teal-400'}`} />
                 <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                  {selectedKey}{keyType === 'minor' ? 'm' : ''} {t('scaleNotes')}
+                  {formatKeyName(selectedKey)}{keyType === 'minor' ? 'm' : ''} {t('scaleNotes')}
                 </h3>
               </div>
               <div className="flex gap-1 flex-wrap">
