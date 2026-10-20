@@ -134,29 +134,37 @@ jobs:
           echo "=== Checking for common issues ==="
           
           # Fix: Ensure compileSdk and targetSdk are set correctly
-          if grep -q "compileSdkVersion" app/build.gradle; then
+          if grep -q "compileSdkVersion" app/build.gradle 2>/dev/null; then
             echo "✅ compileSdkVersion found"
           else
             echo "⚠️  compileSdkVersion not found, may cause issues"
           fi
           
           # Fix: Ensure minSdkVersion is compatible
-          if grep -q "minSdkVersion" app/build.gradle; then
-            MIN_SDK=$(grep "minSdkVersion" app/build.gradle | grep -oE '[0-9]+')
-            echo "✅ minSdkVersion: $MIN_SDK"
-            if [ "$MIN_SDK" -lt 22 ]; then
-              echo "⚠️  minSdkVersion is too low, updating to 22"
-              sed -i 's/minSdkVersion [0-9]*/minSdkVersion 22/' app/build.gradle
+          if grep -q "minSdkVersion" app/build.gradle 2>/dev/null; then
+            MIN_SDK=$(grep "minSdkVersion" app/build.gradle | grep -oE '[0-9]+' | head -1)
+            if [ -n "$MIN_SDK" ]; then
+              echo "✅ minSdkVersion: $MIN_SDK"
+              if [ "$MIN_SDK" -lt 22 ]; then
+                echo "⚠️  minSdkVersion is too low, updating to 22"
+                sed -i 's/minSdkVersion [0-9]*/minSdkVersion 22/' app/build.gradle
+              fi
+            else
+              echo "⚠️  Could not parse minSdkVersion"
             fi
+          else
+            echo "⚠️  minSdkVersion not found"
           fi
           
           # Fix: Ensure namespace is set (required for AGP 8+)
-          if ! grep -q "namespace" app/build.gradle && ! grep -q "namespace" app/build.gradle.kts; then
+          if ! grep -q "namespace" app/build.gradle 2>/dev/null && ! grep -q "namespace" app/build.gradle.kts 2>/dev/null; then
             echo "⚠️  namespace not found, adding it"
             # Add namespace to app/build.gradle
             if [ -f "app/build.gradle" ]; then
               sed -i '/android {/a\    namespace "com.circleoffifths.guitar"' app/build.gradle
             fi
+          else
+            echo "✅ namespace found"
           fi
           
           echo "✅ Common issues check completed"
