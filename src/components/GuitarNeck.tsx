@@ -5,7 +5,7 @@ interface GuitarNeckProps {
   shape: ChordShape;
 }
 
-const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E'];
+const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e'];
 const NUM_FRETS_DISPLAY = 5;
 
 const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
@@ -25,7 +25,7 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
   const stringSpacing = neckHeight / 5;
   const fretWidth = neckWidth / NUM_FRETS_DISPLAY;
 
-  // String Y positions (top to bottom: high e to low E)
+  // String Y positions (top to bottom: low E to high e)
   const getStringY = (stringIdx: number): number => {
     return marginTop + stringIdx * stringSpacing;
   };

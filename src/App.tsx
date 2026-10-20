@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import CircleOfFifths from './components/CircleOfFifths';
 import GuitarNeck from './components/GuitarNeck';
 import { getDiatonicChords, getScaleNotes, getChordShapes, ChordShape } from './data/musicData';
+import { Language, translations } from './data/translations';
 
 function App() {
   const [selectedKey, setSelectedKey] = useState('C');
@@ -9,6 +10,11 @@ function App() {
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
   const [shapeIndex, setShapeIndex] = useState(0);
   const [showSheet, setShowSheet] = useState(false);
+  const [language, setLanguage] = useState<Language>('en');
+
+  const t = (key: keyof typeof translations.en): string => {
+    return translations[language][key] || translations.en[key];
+  };
 
   const diatonicChords = getDiatonicChords(selectedKey, keyType);
   const scaleNotes = getScaleNotes(selectedKey, keyType);
@@ -35,6 +41,10 @@ function App() {
   const minorDegrees = ['i', 'ii', 'III', 'iv', 'v', 'VI', 'VII'];
   const degrees = keyType === 'major' ? majorDegrees : minorDegrees;
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'en' ? 'ru' : 'en');
+  };
+
   return (
     <div className="min-h-screen bg-[#0f0f1e] text-white flex flex-col overflow-hidden">
       {/* Header */}
@@ -51,30 +61,39 @@ function App() {
             </svg>
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white leading-tight">Circle of Fifths</h1>
-            <p className="text-[10px] text-gray-500 leading-tight">Guitar Theory Tool</p>
+            <h1 className="text-sm font-bold text-white leading-tight">{t('appTitle')}</h1>
+            <p className="text-[10px] text-gray-500 leading-tight">{t('appSubtitle')}</p>
           </div>
         </div>
-        <div className="flex gap-1 bg-gray-800/50 rounded-full p-0.5">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 bg-gray-800/50 rounded-full p-0.5">
+            <button
+              onClick={() => { setKeyType('major'); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                keyType === 'major'
+                  ? 'bg-yellow-400/20 text-yellow-300 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              {t('maj')}
+            </button>
+            <button
+              onClick={() => { setKeyType('minor'); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                keyType === 'minor'
+                  ? 'bg-teal-400/20 text-teal-300 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              {t('min')}
+            </button>
+          </div>
           <button
-            onClick={() => { setKeyType('major'); }}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              keyType === 'major'
-                ? 'bg-yellow-400/20 text-yellow-300 shadow-sm'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
+            onClick={toggleLanguage}
+            className="px-2 py-1.5 rounded-full text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 transition-all"
+            title={t('language')}
           >
-            Maj
-          </button>
-          <button
-            onClick={() => { setKeyType('minor'); }}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              keyType === 'minor'
-                ? 'bg-teal-400/20 text-teal-300 shadow-sm'
-                : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            Min
+            {language === 'en' ? 'RU' : 'EN'}
           </button>
         </div>
       </header>
@@ -96,7 +115,7 @@ function App() {
           <div className="flex items-center gap-2 mb-2">
             <div className={`w-2 h-2 rounded-full ${keyType === 'major' ? 'bg-yellow-400' : 'bg-teal-400'}`} />
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              {selectedKey}{keyType === 'minor' ? 'm' : ''} Scale — Notes & Degrees
+              {selectedKey}{keyType === 'minor' ? 'm' : ''} {t('scaleNotes')} — {t('notesAndDegrees')}
             </h3>
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -122,7 +141,7 @@ function App() {
                 <span className={`text-[8px] ${
                   keyType === 'major' ? 'text-yellow-400/40' : 'text-teal-400/40'
                 }`}>
-                  {i + 1}{getOrdinalSuffix(i + 1)}
+                  {i + 1}{getOrdinalSuffix(i + 1, language)}
                 </span>
               </div>
             ))}
@@ -134,13 +153,13 @@ function App() {
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-2 h-2 rounded-full ${keyType === 'major' ? 'bg-yellow-400' : 'bg-teal-400'}`} />
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex-1">
-              Diatonic Chords
+              {t('diatonicChords')}
             </h3>
             <span className="text-[10px] text-gray-500 flex items-center gap-1">
               <svg viewBox="0 0 24 24" className="w-3 h-3" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
               </svg>
-              tap to see shape
+              {t('tapToSeeShape')}
             </span>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -189,8 +208,7 @@ function App() {
         <div className="px-4 py-2">
           <div className="bg-gray-800/30 rounded-xl p-3 border border-gray-700/30">
             <p className="text-xs text-gray-400 leading-relaxed">
-              🎯 <span className="text-gray-300">Tap a segment</span> on the circle to change key (it rotates to top).
-              Then <span className="text-gray-300">tap any chord</span> to see its guitar fingering.
+              🎯 {t('hint')}
             </p>
           </div>
         </div>
@@ -214,7 +232,7 @@ function App() {
               <div>
                 <h2 className="text-2xl font-bold text-white">{selectedChord}</h2>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {chordShapes.length} voicing{chordShapes.length !== 1 ? 's' : ''} available
+                  {chordShapes.length} {chordShapes.length !== 1 ? t('voicingsAvailable') : t('voicingAvailable')}
                 </p>
               </div>
               <button
@@ -254,8 +272,8 @@ function App() {
             {chordShapes.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <p className="text-4xl mb-3">🎸</p>
-                <p className="text-sm">No chord diagram available for "{selectedChord}"</p>
-                <p className="text-xs mt-1 text-gray-600">Try another chord from the diatonic list</p>
+                <p className="text-sm">{t('noDiagram')} "{selectedChord}"</p>
+                <p className="text-xs mt-1 text-gray-600">{t('tryAnother')}</p>
               </div>
             )}
 
@@ -263,29 +281,29 @@ function App() {
             <div className="flex items-center justify-center gap-3 mt-4 text-[10px] text-gray-500">
               <span className="flex items-center gap-1">
                 <span className="w-4 h-4 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-[8px] text-yellow-300">1</span>
-                Index
+                {t('index')}
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-4 h-4 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-[8px] text-yellow-300">2</span>
-                Middle
+                {t('middle')}
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-4 h-4 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-[8px] text-yellow-300">3</span>
-                Ring
+                {t('ring')}
               </span>
               <span className="flex items-center gap-1">
                 <span className="w-4 h-4 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-[8px] text-yellow-300">4</span>
-                Pinky
+                {t('pinky')}
               </span>
             </div>
 
             {/* Symbols legend */}
             <div className="flex items-center justify-center gap-4 mt-2 text-[10px] text-gray-500">
               <span className="flex items-center gap-1">
-                <span className="text-teal-400">○</span> Open string
+                <span className="text-teal-400">○</span> {t('openString')}
               </span>
               <span className="flex items-center gap-1">
-                <span className="text-red-400">✕</span> Don't play
+                <span className="text-red-400">✕</span> {t('dontPlay')}
               </span>
             </div>
           </div>
@@ -295,7 +313,10 @@ function App() {
   );
 }
 
-function getOrdinalSuffix(n: number): string {
+function getOrdinalSuffix(n: number, lang: Language): string {
+  if (lang === 'ru') {
+    return '-я';
+  }
   const s = ['th', 'st', 'nd', 'rd'];
   const v = n % 100;
   return s[(v - 20) % 10] || s[v] || s[0];
