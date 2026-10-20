@@ -98,6 +98,78 @@ jobs:
           echo "✅ Android platform added"
           ls -la android/
 
+      # 8.5. Setup app icon
+      - name: 🎨 Setup App Icon
+        run: |
+          echo "🎨 Setting up app icon..."
+          
+          # Install image conversion tools
+          apt-get update -qq && apt-get install -y -qq librsvg2-bin > /dev/null 2>&1 || true
+          
+          # Create icon directories
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+          mkdir -p android/app/src/main/res/mipmap-anydpi-v26
+          mkdir -p android/app/src/main/res/drawable
+          
+          # Check if we have SVG source
+          if [ -f "public/icon.svg" ]; then
+            echo "📐 Converting SVG icon to PNG..."
+            
+            # Convert SVG to different sizes
+            rsvg-convert -w 48 -h 48 public/icon.svg -o android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+            rsvg-convert -w 72 -h 72 public/icon.svg -o android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+            rsvg-convert -w 96 -h 96 public/icon.svg -o android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+            rsvg-convert -w 144 -h 144 public/icon.svg -o android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+            rsvg-convert -w 192 -h 192 public/icon.svg -o android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+            
+            # Round icons (same as regular for now)
+            cp android/app/src/main/res/mipmap-mdpi/ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+            cp android/app/src/main/res/mipmap-hdpi/ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+            cp android/app/src/main/res/mipmap-xhdpi/ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+            cp android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+            cp android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+            
+            echo "✅ PNG icons created"
+          else
+            echo "⚠️  No icon.svg found, using default Capacitor icons"
+          fi
+          
+          # Copy SVG as foreground for adaptive icon
+          if [ -f "public/icon.svg" ]; then
+            cp public/icon.svg android/app/src/main/res/drawable/ic_launcher_foreground.svg
+          fi
+          
+          # Create background for adaptive icon
+          cat > android/app/src/main/res/drawable/ic_launcher_background.xml << 'BGEOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#0f0f1e"/>
+          </shape>
+          BGEOF
+          
+          # Create adaptive icon configuration
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml << 'AIEOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_launcher_background"/>
+              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+          </adaptive-icon>
+          AIEOF
+          
+          cat > android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml << 'AIREOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_launcher_background"/>
+              <foreground android:drawable="@drawable/ic_launcher_foreground"/>
+          </adaptive-icon>
+          AIREOF
+          
+          echo "✅ Adaptive icon configuration created"
+
       # 9. Sync web assets to native project
       - name: 🔄 Sync Capacitor
         run: |
