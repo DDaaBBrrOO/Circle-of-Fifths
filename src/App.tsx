@@ -148,7 +148,6 @@ function App() {
                 selectedKey={selectedKey}
                 keyType={keyType}
                 onKeySelect={handleKeySelect}
-                highlightedNotes={scaleNotes}
               />
             </div>
 

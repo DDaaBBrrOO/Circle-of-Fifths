@@ -1,24 +1,29 @@
 import React, { useMemo } from 'react';
-import { CIRCLE_OF_FIFTHS, getNoteIndex, NOTES } from '../data/musicData';
+import { CIRCLE_OF_FIFTHS, getNoteIndex, NOTES, getScaleNotes } from '../data/musicData';
 
 interface CircleOfFifthsProps {
   selectedKey: string;
   keyType: 'major' | 'minor';
   onKeySelect: (key: string, type: 'major' | 'minor') => void;
-  highlightedNotes?: string[];
+}
+
+interface DiatonicChord {
+  name: string;
+  roman: string;
+  quality: 'maj' | 'min' | 'dim';
 }
 
 const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
   selectedKey,
   keyType,
   onKeySelect,
-  highlightedNotes = [],
 }) => {
   const cx = 200;
   const cy = 200;
   const outerRadius = 180;
   const middleRadius = 140;
-  const innerRadius = 95;
+  const innerRadius = 100;
+  const innermostRadius = 65;
 
   // Get relative minor for each major key
   const getRelativeMinor = (majorKey: string): string => {
@@ -26,12 +31,56 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
     return NOTES[(idx + 9) % 12];
   };
 
+  // Get diminished chord for each major key (vii° degree)
+  const getDiminishedChord = (majorKey: string): string => {
+    const idx = getNoteIndex(majorKey);
+    return NOTES[(idx + 11) % 12]; // 11 semitones up = vii°
+  };
+
+  // Get diatonic chords for current key
+  const diatonicChords = useMemo((): DiatonicChord[] => {
+    const scaleNotes = getScaleNotes(selectedKey, keyType);
+    
+    if (keyType === 'major') {
+      return [
+        { name: scaleNotes[0], roman: 'I', quality: 'maj' },
+        { name: scaleNotes[1] + 'm', roman: 'ii', quality: 'min' },
+        { name: scaleNotes[2] + 'm', roman: 'iii', quality: 'min' },
+        { name: scaleNotes[3], roman: 'IV', quality: 'maj' },
+        { name: scaleNotes[4], roman: 'V', quality: 'maj' },
+        { name: scaleNotes[5] + 'm', roman: 'vi', quality: 'min' },
+        { name: scaleNotes[6] + '°', roman: 'vii°', quality: 'dim' },
+      ];
+    } else {
+      return [
+        { name: scaleNotes[0] + 'm', roman: 'i', quality: 'min' },
+        { name: scaleNotes[1] + '°', roman: 'ii°', quality: 'dim' },
+        { name: scaleNotes[2], roman: 'III', quality: 'maj' },
+        { name: scaleNotes[3] + 'm', roman: 'iv', quality: 'min' },
+        { name: scaleNotes[4] + 'm', roman: 'v', quality: 'min' },
+        { name: scaleNotes[5], roman: 'VI', quality: 'maj' },
+        { name: scaleNotes[6], roman: 'VII', quality: 'maj' },
+      ];
+    }
+  }, [selectedKey, keyType]);
+
   // Calculate rotation so selected key is at 12 o'clock (top)
   const rotationDeg = useMemo(() => {
-    const selectedIndex = CIRCLE_OF_FIFTHS.indexOf(selectedKey);
-    if (selectedIndex === -1) return 0;
-    return -(selectedIndex * 30);
-  }, [selectedKey]);
+    if (keyType === 'major') {
+      const selectedIndex = CIRCLE_OF_FIFTHS.indexOf(selectedKey);
+      if (selectedIndex === -1) return 0;
+      return -(selectedIndex * 30);
+    } else {
+      // For minor keys, find the major key that has this as relative minor
+      for (let i = 0; i < CIRCLE_OF_FIFTHS.length; i++) {
+        const relativeMinor = getRelativeMinor(CIRCLE_OF_FIFTHS[i]);
+        if (relativeMinor === selectedKey) {
+          return -(i * 30);
+        }
+      }
+      return 0;
+    }
+  }, [selectedKey, keyType]);
 
   const rotationRad = (rotationDeg * Math.PI) / 180;
 
@@ -39,7 +88,6 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
     return (index * 30 - 90) * (Math.PI / 180);
   };
 
-  // Get angle with rotation applied
   const getRotatedAngle = (index: number): number => {
     return getBaseAngle(index) + rotationRad;
   };
@@ -81,12 +129,21 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
     onKeySelect(key, type);
   };
 
-  const isSelected = (key: string, type: 'major' | 'minor'): boolean => {
-    return selectedKey === key && keyType === type;
-  };
-
-  const isHighlighted = (note: string): boolean => {
-    return highlightedNotes.includes(note);
+  // Check if a chord is in the current diatonic scale
+  const getChordHighlight = (chordName: string, type: 'major' | 'minor' | 'dim'): { highlighted: boolean; roman: string; color: string } => {
+    const diatonic = diatonicChords.find(d => d.name === chordName);
+    if (diatonic) {
+      let color = '#2d2d44';
+      if (diatonic.quality === 'maj' && diatonic.roman !== 'I' && diatonic.roman !== 'i') {
+        color = 'rgba(255, 215, 0, 0.3)'; // Transparent yellow for major
+      } else if (diatonic.quality === 'min') {
+        color = 'rgba(78, 205, 196, 0.3)'; // Transparent teal for minor
+      } else if (diatonic.quality === 'dim') {
+        color = 'rgba(231, 76, 60, 0.3)'; // Transparent red for diminished
+      }
+      return { highlighted: true, roman: diatonic.roman, color };
+    }
+    return { highlighted: false, roman: '', color: '#2d2d44' };
   };
 
   const halfSegment = Math.PI / 12;
@@ -105,55 +162,92 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
             transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          {/* Outer ring - Major keys (segments only) */}
+          {/* Outer ring - Major keys */}
           {CIRCLE_OF_FIFTHS.map((key, i) => {
             const baseAngle = getBaseAngle(i);
-            const selected = isSelected(key, 'major');
-            const highlighted = isHighlighted(key);
+            const isSelected = selectedKey === key && keyType === 'major';
+            const highlight = getChordHighlight(key, 'major');
+
+            let fillColor = '#2d2d44';
+            if (isSelected) {
+              fillColor = '#FFD700';
+            } else if (highlight.highlighted) {
+              fillColor = highlight.color;
+            }
 
             return (
               <path
                 key={`major-seg-${i}`}
                 d={getArcPath(baseAngle, halfSegment, middleRadius, outerRadius)}
-                fill={selected ? '#FFD700' : highlighted ? 'rgba(255, 215, 0, 0.25)' : '#2d2d44'}
-                stroke={selected ? '#FFD700' : '#3d3d5c'}
-                strokeWidth={selected ? 2.5 : 1}
+                fill={fillColor}
+                stroke={isSelected ? '#FFD700' : '#3d3d5c'}
+                strokeWidth={isSelected ? 2.5 : 1}
                 onClick={() => handleSegmentClick(i, 'major')}
                 className="cursor-pointer hover:brightness-125 transition-all duration-200"
               />
             );
           })}
 
-          {/* Inner ring - Minor keys (segments only) */}
+          {/* Middle ring - Minor keys */}
           {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
             const minorKey = getRelativeMinor(majorKey);
             const baseAngle = getBaseAngle(i);
-            const selected = isSelected(minorKey, 'minor');
-            const highlighted = isHighlighted(minorKey);
+            const isSelected = selectedKey === minorKey && keyType === 'minor';
+            const highlight = getChordHighlight(minorKey + 'm', 'minor');
+
+            let fillColor = '#1f1f35';
+            if (isSelected) {
+              fillColor = '#4ECDC4';
+            } else if (highlight.highlighted) {
+              fillColor = highlight.color;
+            }
 
             return (
               <path
                 key={`minor-seg-${i}`}
                 d={getArcPath(baseAngle, halfSegment, innerRadius, middleRadius)}
-                fill={selected ? '#4ECDC4' : highlighted ? 'rgba(78, 205, 196, 0.25)' : '#1f1f35'}
-                stroke={selected ? '#4ECDC4' : '#2d2d44'}
-                strokeWidth={selected ? 2.5 : 1}
+                fill={fillColor}
+                stroke={isSelected ? '#4ECDC4' : '#2d2d44'}
+                strokeWidth={isSelected ? 2.5 : 1}
                 onClick={() => handleSegmentClick(i, 'minor')}
                 className="cursor-pointer hover:brightness-125 transition-all duration-200"
               />
             );
           })}
+
+          {/* Inner ring - Diminished chords */}
+          {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
+            const dimChord = getDiminishedChord(majorKey) + '°';
+            const baseAngle = getBaseAngle(i);
+            const highlight = getChordHighlight(dimChord, 'dim');
+
+            let fillColor = '#16162a';
+            if (highlight.highlighted) {
+              fillColor = highlight.color;
+            }
+
+            return (
+              <path
+                key={`dim-seg-${i}`}
+                d={getArcPath(baseAngle, halfSegment, innermostRadius, innerRadius)}
+                fill={fillColor}
+                stroke={highlight.highlighted ? '#E74C3C' : '#2d2d44'}
+                strokeWidth={highlight.highlighted ? 2 : 1}
+                className="transition-all duration-200"
+              />
+            );
+          })}
         </g>
 
-        {/* Text labels - positioned with transform for smooth animation */}
-        {/* Major key labels */}
+        {/* Text labels - NOT rotating */}
+        {/* Major key labels with roman numerals */}
         {CIRCLE_OF_FIFTHS.map((key, i) => {
           const rotatedAngle = getRotatedAngle(i);
           const labelRadius = (outerRadius + middleRadius) / 2;
           const x = cx + labelRadius * Math.cos(rotatedAngle);
           const y = cy + labelRadius * Math.sin(rotatedAngle);
-          const selected = isSelected(key, 'major');
-          const highlighted = isHighlighted(key);
+          const isSelected = selectedKey === key && keyType === 'major';
+          const highlight = getChordHighlight(key, 'major');
 
           return (
             <g
@@ -168,26 +262,37 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
                 y={0}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={selected ? '#1a1a2e' : highlighted ? '#FFD700' : '#e0e0e0'}
-                fontSize={selected ? '17' : '14'}
-                fontWeight={selected || highlighted ? 'bold' : 'normal'}
+                fill={isSelected ? '#1a1a2e' : highlight.highlighted ? '#FFD700' : '#e0e0e0'}
+                fontSize={isSelected ? '17' : '14'}
+                fontWeight={isSelected || highlight.highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
                 {key}
+                {highlight.highlighted && (
+                  <tspan
+                    fontSize="9"
+                    dx="2"
+                    dy="3"
+                    fill={isSelected ? '#1a1a2e' : '#FFD700'}
+                    opacity="0.7"
+                  >
+                    {highlight.roman}
+                  </tspan>
+                )}
               </text>
             </g>
           );
         })}
 
-        {/* Minor key labels */}
+        {/* Minor key labels with roman numerals */}
         {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
           const minorKey = getRelativeMinor(majorKey);
           const rotatedAngle = getRotatedAngle(i);
           const labelRadius = (middleRadius + innerRadius) / 2;
           const x = cx + labelRadius * Math.cos(rotatedAngle);
           const y = cy + labelRadius * Math.sin(rotatedAngle);
-          const selected = isSelected(minorKey, 'minor');
-          const highlighted = isHighlighted(minorKey);
+          const isSelected = selectedKey === minorKey && keyType === 'minor';
+          const highlight = getChordHighlight(minorKey + 'm', 'minor');
 
           return (
             <g
@@ -202,45 +307,100 @@ const CircleOfFifths: React.FC<CircleOfFifthsProps> = ({
                 y={0}
                 textAnchor="middle"
                 dominantBaseline="middle"
-                fill={selected ? '#1a1a2e' : highlighted ? '#4ECDC4' : '#a0a0a0'}
-                fontSize={selected ? '13' : '11'}
-                fontWeight={selected || highlighted ? 'bold' : 'normal'}
+                fill={isSelected ? '#1a1a2e' : highlight.highlighted ? '#4ECDC4' : '#a0a0a0'}
+                fontSize={isSelected ? '13' : '11'}
+                fontWeight={isSelected || highlight.highlighted ? 'bold' : 'normal'}
                 className="pointer-events-none"
               >
                 {minorKey}m
+                {highlight.highlighted && (
+                  <tspan
+                    fontSize="8"
+                    dx="2"
+                    dy="2"
+                    fill={isSelected ? '#1a1a2e' : '#4ECDC4'}
+                    opacity="0.7"
+                  >
+                    {highlight.roman}
+                  </tspan>
+                )}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Diminished chord labels with roman numerals */}
+        {CIRCLE_OF_FIFTHS.map((majorKey, i) => {
+          const dimChord = getDiminishedChord(majorKey) + '°';
+          const rotatedAngle = getRotatedAngle(i);
+          const labelRadius = (innerRadius + innermostRadius) / 2;
+          const x = cx + labelRadius * Math.cos(rotatedAngle);
+          const y = cy + labelRadius * Math.sin(rotatedAngle);
+          const highlight = getChordHighlight(dimChord, 'dim');
+
+          return (
+            <g
+              key={`dim-text-${i}`}
+              style={{
+                transform: `translate(${x}px, ${y}px)`,
+                transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
+              <text
+                x={0}
+                y={0}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill={highlight.highlighted ? '#E74C3C' : '#888'}
+                fontSize="9"
+                fontWeight={highlight.highlighted ? 'bold' : 'normal'}
+                className="pointer-events-none"
+              >
+                {dimChord}
+                {highlight.highlighted && (
+                  <tspan
+                    fontSize="7"
+                    dx="1"
+                    dy="2"
+                    fill="#E74C3C"
+                    opacity="0.7"
+                  >
+                    {highlight.roman}
+                  </tspan>
+                )}
               </text>
             </g>
           );
         })}
 
         {/* Center circle with info (does not rotate) */}
-        <circle cx={cx} cy={cy} r={innerRadius - 5} fill="#16162a" stroke="#2d2d44" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={innermostRadius - 5} fill="#16162a" stroke="#2d2d44" strokeWidth="1" />
         
         {/* Triangle pointer at top */}
         <polygon
-          points={`${cx},${cy - innerRadius + 8} ${cx - 7},${cy - innerRadius - 3} ${cx + 7},${cy - innerRadius - 3}`}
+          points={`${cx},${cy - innermostRadius} ${cx - 7},${cy - innermostRadius - 10} ${cx + 7},${cy - innermostRadius - 10}`}
           fill={keyType === 'major' ? '#FFD700' : '#4ECDC4'}
           opacity="0.9"
         />
         
         <text
           x={cx}
-          y={cy - 15}
+          y={cy - 10}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={keyType === 'major' ? '#FFD700' : '#4ECDC4'}
-          fontSize="24"
+          fontSize="20"
           fontWeight="bold"
         >
           {selectedKey}{keyType === 'minor' ? 'm' : ''}
         </text>
         <text
           x={cx}
-          y={cy + 12}
+          y={cy + 10}
           textAnchor="middle"
           dominantBaseline="middle"
           fill="#888"
-          fontSize="11"
+          fontSize="10"
         >
           {keyType === 'major' ? 'Major' : 'Minor'}
         </text>
