@@ -16,7 +16,7 @@ Capacitor требует **Java 21**, но в workflow установлена б
 
 ```yaml
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   JAVA_VERSION: '21'  # ← Измените с 17 на 21
 ```
 

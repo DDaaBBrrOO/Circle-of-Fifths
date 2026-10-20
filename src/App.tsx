@@ -52,14 +52,15 @@ function App() {
   return (
     <div className="h-full bg-[#0f0f1e] text-white flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="px-3 pt-2 pb-1 flex items-center justify-between border-b border-gray-800/50 flex-shrink-0">
+      <header className="px-3 pt-2 pb-1 flex items-center justify-between border-b border-gray-800/50 flex-shrink-0" style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 text-black" fill="currentColor">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-              <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" strokeWidth="1.5" />
-              <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" strokeWidth="1.5" />
+          <div className="w-8 h-8 rounded-xl bg-[#0f0f1e] flex items-center justify-center shadow-lg shadow-orange-500/20 border border-gray-700">
+            <svg viewBox="0 0 512 512" className="w-6 h-6">
+              <circle cx="256" cy="256" r="180" fill="none" stroke="#FFD700" strokeWidth="22"/>
+              <circle cx="256" cy="256" r="108" fill="none" stroke="#FFD700" strokeWidth="16"/>
+              <line x1="256" y1="42" x2="256" y2="128" stroke="#FFD700" strokeWidth="16" strokeLinecap="round"/>
+              <line x1="256" y1="384" x2="256" y2="470" stroke="#FFD700" strokeWidth="16" strokeLinecap="round"/>
+              <circle cx="256" cy="256" r="28" fill="#FFD700"/>
             </svg>
           </div>
           <div>
