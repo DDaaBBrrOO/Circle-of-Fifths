@@ -11,9 +11,12 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
   background-color: #0f0f1e;
   -webkit-text-size-adjust: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 body {
@@ -24,8 +27,11 @@ body {
 
 #root {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height для мобильных */
+  height: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Slide up animation for bottom sheet */
@@ -93,21 +99,5 @@ button, svg text {
 @media (min-width: 481px) {
   html {
     font-size: 16px;
-  }
-}
-
-/* Safe area support for notched devices */
-@supports (padding: max(0px)) {
-  .safe-area-top {
-    padding-top: max(0.75rem, env(safe-area-inset-top));
-  }
-  
-  .safe-area-bottom {
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-  }
-  
-  .safe-area-horizontal {
-    padding-left: max(0.75rem, env(safe-area-inset-left));
-    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 }

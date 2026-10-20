@@ -14,7 +14,7 @@ function App() {
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
   const [shapeIndex, setShapeIndex] = useState(0);
   const [showSheet, setShowSheet] = useState(false);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>('ru');
   const [activeTab, setActiveTab] = useState<TabType>('main');
 
   const t = (key: keyof typeof translations.en): string => {
@@ -50,7 +50,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f1e] text-white flex flex-col overflow-hidden safe-area-top safe-area-bottom">
+    <div className="h-full bg-[#0f0f1e] text-white flex flex-col overflow-hidden">
       {/* Header */}
       <header className="px-3 pt-2 pb-1 flex items-center justify-between border-b border-gray-800/50 flex-shrink-0">
         <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ function App() {
       </nav>
 
       {/* Main content */}
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {activeTab === 'main' && (
           <>
             {/* Circle Section */}
@@ -259,7 +259,7 @@ function App() {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowSheet(false)}
           />
-          <div className="relative w-full max-w-lg bg-[#1a1a2e] rounded-t-3xl border-t border-gray-700/50 p-4 pb-6 animate-slide-up shadow-2xl safe-area-bottom">
+          <div className="relative w-full max-w-lg bg-[#1a1a2e] rounded-t-3xl border-t border-gray-700/50 p-4 pb-6 animate-slide-up shadow-2xl" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
             <div className="absolute top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-gray-600 rounded-full" />
             
             <div className="flex items-center justify-between mb-3 mt-1">
