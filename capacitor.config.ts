@@ -12,6 +12,8 @@ const config: CapacitorConfig = {
     captureInput: true,
     webContentsDebuggingEnabled: false,
   },
+  // Иконки будут скопированы из public/ при сборке
+  // Для кастомных иконок нужно вручную добавить в android/app/src/main/res/
 };
 
 export default config;

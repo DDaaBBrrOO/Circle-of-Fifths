@@ -6,6 +6,11 @@ export const translations = {
     appTitle: 'Circle of Fifths',
     appSubtitle: 'Guitar Theory Tool',
     
+    // Tabs
+    tabMain: 'Circle',
+    tabTheory: 'Theory',
+    tabHelp: 'Help',
+    
     // Key type
     major: 'Major',
     minor: 'Minor',
@@ -44,6 +49,11 @@ export const translations = {
     // Header
     appTitle: 'Круг Квинт',
     appSubtitle: 'Теория для гитары',
+    
+    // Tabs
+    tabMain: 'Круг',
+    tabTheory: 'Теория',
+    tabHelp: 'Помощь',
     
     // Key type
     major: 'Мажор',
