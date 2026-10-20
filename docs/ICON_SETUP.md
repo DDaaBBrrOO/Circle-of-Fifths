@@ -164,6 +164,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 ```
 
+### Ошибка: "The file name must end with .xml or .png"
+
+Эта ошибка возникает, если в директории `android/app/src/main/res/drawable/` находится SVG файл.
+
+**Причина:** Android Gradle Plugin не поддерживает SVG файлы в ресурсах. Поддерживаются только XML (vector drawable) и PNG.
+
+**Решение:**
+1. Удалите все SVG файлы из `res/drawable/`:
+```bash
+rm -f android/app/src/main/res/drawable/*.svg
+```
+
+2. Скрипт `scripts/generate-icons.js` теперь автоматически конвертирует SVG в PNG (432x432) для foreground иконки.
+
+3. Если проблема сохраняется, очистите проект и пересоберите:
+```bash
+cd android
+./gradlew clean
+cd ..
+node scripts/generate-icons.js
+cd android
+./gradlew assembleDebug
+```
+
+**Примечание:** Workflow автоматически удаляет старые SVG файлы перед генерацией иконок.
+
 ### Ошибка: "Source icon not found at public/icon.svg"
 
 Убедитесь, что файл `public/icon.svg` существует. Если нет, создайте его или скачайте из репозитория.

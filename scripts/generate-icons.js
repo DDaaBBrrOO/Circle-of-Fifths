@@ -60,15 +60,35 @@ async function generateIcons() {
     }
   }
 
-  // Copy SVG as foreground for adaptive icon
+  // Convert SVG to PNG for adaptive icon foreground
+  // Android doesn't support SVG in res/drawable, so we use a large PNG
   const drawableDir = path.join(androidResPath, 'drawable');
   if (!fs.existsSync(drawableDir)) {
     fs.mkdirSync(drawableDir, { recursive: true });
   }
 
-  const foregroundPath = path.join(drawableDir, 'ic_launcher_foreground.svg');
-  fs.copyFileSync(svgPath, foregroundPath);
-  console.log('✅ Copied SVG as adaptive icon foreground');
+  // Remove any old SVG files that might cause build errors
+  const oldSvgPath = path.join(drawableDir, 'ic_launcher_foreground.svg');
+  if (fs.existsSync(oldSvgPath)) {
+    fs.unlinkSync(oldSvgPath);
+    console.log('🗑️  Removed old ic_launcher_foreground.svg');
+  }
+
+  const foregroundPath = path.join(drawableDir, 'ic_launcher_foreground.png');
+  
+  // Generate a 432x432 PNG for foreground (Android adaptive icon spec)
+  // The foreground should be 108dp with 18dp padding on each side = 72dp content area
+  // For xxxhdpi (4x): 108dp * 4 = 432px
+  try {
+    await sharp(svgPath)
+      .resize(432, 432)
+      .png()
+      .toFile(foregroundPath);
+    console.log('✅ Generated adaptive icon foreground PNG (432x432)');
+  } catch (error) {
+    console.error('❌ Error generating foreground PNG:', error.message);
+    process.exit(1);
+  }
 
   // Create background XML
   const backgroundXml = `<?xml version="1.0" encoding="utf-8"?>
@@ -85,6 +105,7 @@ async function generateIcons() {
     fs.mkdirSync(anydpiDir, { recursive: true });
   }
 
+  // Note: foreground is now a PNG, not SVG
   const adaptiveIconXml = `<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/ic_launcher_background"/>

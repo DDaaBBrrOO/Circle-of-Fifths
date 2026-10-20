@@ -103,6 +103,10 @@ jobs:
         run: |
           echo "🎨 Setting up app icon..."
           
+          # Remove any old SVG files that might cause build errors
+          rm -f android/app/src/main/res/drawable/ic_launcher_foreground.svg
+          rm -f android/app/src/main/res/drawable/ic_launcher_background.svg
+          
           # Check if we have SVG source
           if [ -f "public/icon.svg" ]; then
             echo "📐 Converting SVG icon to PNG using Node.js..."
