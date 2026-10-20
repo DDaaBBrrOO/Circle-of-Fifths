@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle of Fifths - Обновлённая версия (ПРОЕКТ)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1e;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            color: #FFD700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .warning {
+            background: rgba(255, 165, 0, 0.1);
+            border: 2px solid #FFA500;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .warning h3 {
+            color: #FFA500;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .circle-section {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+        }
+        
+        .circle-section h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .legend {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+        }
+        
+        .legend h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .legend-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .legend-text {
+            flex: 1;
+        }
+        
+        .legend-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #FFD700;
+        }
+        
+        .legend-text span {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .changes {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+            margin-bottom: 40px;
+        }
+        
+        .changes h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .change-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #FFD700;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .change-item h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .change-item p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .example {
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px solid #4ECDC4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .example h3 {
+            color: #4ECDC4;
+            margin-bottom: 15px;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .example-chord {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .chord-selected {
+            background: #FFD700;
+            color: #0f0f1e;
+        }
+        
+        .chord-major {
+            background: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+        
+        .chord-minor {
+            background: rgba(78, 205, 196, 0.3);
+            color: #4ECDC4;
+            border: 2px solid rgba(78, 205, 196, 0.5);
+        }
+        
+        .chord-dim {
+            background: rgba(231, 76, 60, 0.3);
+            color: #E74C3C;
+            border: 2px solid rgba(231, 76, 60, 0.5);
+        }
+        
+        .approval {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid #2ECC71;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .approval h3 {
+            color: #2ECC71;
+            margin-bottom: 10px;
+        }
+        
+        .approval p {
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        
+        .approval code {
+            background: rgba(46, 204, 113, 0.2);
+            padding: 5px 15px;
+            border-radius: 5px;
+            color: #2ECC71;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎸 Circle of Fifths - Обновлённая версия</h1>
+        <p class="subtitle">Проект для согласования перед реализацией</p>
+        
+        <div class="warning">
+            <h3>⚠️ ЭТО ПРОЕКТ ДЛЯ СОГЛАСОВАНИЯ</h3>
+            <p>Пожалуйста, изучите изменения ниже и подтвердите, если всё верно</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="circle-section">
+                <h2>🎯 Структура круга (3 кольца)</h2>
+                <svg viewBox="0 0 400 400" width="100%" style="max-width: 400px; margin: 0 auto; display: block;">
+                    <!-- Background -->
+                    <circle cx="200" cy="200" r="195" fill="#1a1a2e" stroke="#2d2d44" stroke-width="2"/>
+                    
+                    <!-- Внешнее кольцо - Мажорные аккорды -->
+                    <!-- A (выбранный) - ярко-жёлтый -->
+                    <path d="M 200 20 A 180 180 0 0 1 290 47 L 260 87 A 140 140 0 0 0 200 60 Z" 
+                          fill="#FFD700" stroke="#FFD700" stroke-width="2"/>
+                    <text x="245" y="70" fill="#0f0f1e" font-size="16" font-weight="bold" text-anchor="middle">A</text>
+                    
+                    <!-- D (мажорный) - прозрачно-жёлтый -->
+                    <path d="M 290 47 A 180 180 0 0 1 353 110 L 313 140 A 140 140 0 0 0 260 87 Z" 
+                          fill="rgba(255, 215, 0, 0.3)" stroke="rgba(255, 215, 0, 0.5)" stroke-width="2"/>
+                    <text x="310" y="95" fill="#FFD700" font-size="14" font-weight="bold" text-anchor="middle">D</text>
+                    
+                    <!-- E (мажорный) - прозрачно-жёлтый -->
+                    <path d="M 110 47 A 180 180 0 0 1 200 20 L 200 60 A 140 140 0 0 0 140 87 Z" 
+                          fill="rgba(255, 215, 0, 0.3)" stroke="rgba(255, 215, 0, 0.5)" stroke-width="2"/>
+                    <text x="155" y="70" fill="#FFD700" font-size="14" font-weight="bold" text-anchor="middle">E</text>
+                    
+                    <!-- Остальные мажорные - обычные -->
+                    <path d="M 353 110 A 180 180 0 0 1 380 200 L 340 200 A 140 140 0 0 0 313 140 Z" 
+                          fill="#2d2d44" stroke="#3d3d5c" stroke-width="1"/>
+                    <text x="350" y="165" fill="#e0e0e0" font-size="14" text-anchor="middle">B</text>
+                    
+                    <!-- Среднее кольцо - Минорные аккорды -->
+                    <!-- F#m (минорный) - прозрачно-бирюзовый -->
+                    <path d="M 260 87 A 140 140 0 0 1 313 140 L 273 170 A 100 100 0 0 0 235 125 Z" 
+                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
+                    <text x="275" y="135" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">F#m</text>
+                    
+                    <!-- Bm (минорный) - прозрачно-бирюзовый -->
+                    <path d="M 140 87 A 140 140 0 0 0 87 140 L 127 170 A 100 100 0 0 1 165 125 Z" 
+                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
+                    <text x="125" y="135" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">Bm</text>
+                    
+                    <!-- C#m (минорный) - прозрачно-бирюзовый -->
+                    <path d="M 313 140 A 140 140 0 0 1 340 200 L 300 200 A 100 100 0 0 0 273 170 Z" 
+                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
+                    <text x="310" y="185" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">C#m</text>
+                    
+                    <!-- Остальные минорные - обычные -->
+                    <path d="M 87 140 A 140 140 0 0 0 60 200 L 100 200 A 100 100 0 0 1 127 170 Z" 
+                          fill="#1f1f35" stroke="#2d2d44" stroke-width="1"/>
+                    <text x="90" y="185" fill="#a0a0a0" font-size="11" text-anchor="middle">G#m</text>
+                    
+                    <!-- Внутреннее кольцо - Уменьшённые аккорды (НОВОЕ!) -->
+                    <!-- G#° (уменьшённый) - прозрачно-красный -->
+                    <path d="M 235 125 A 100 100 0 0 1 273 170 L 245 185 A 70 70 0 0 0 215 155 Z" 
+                          fill="rgba(231, 76, 60, 0.3)" stroke="rgba(231, 76, 60, 0.5)" stroke-width="2"/>
+                    <text x="245" y="165" fill="#E74C3C" font-size="11" font-weight="bold" text-anchor="middle">G#°</text>
+                    
+                    <!-- Остальные уменьшённые - обычные -->
+                    <path d="M 165 125 A 100 100 0 0 0 127 170 L 155 185 A 70 70 0 0 1 185 155 Z" 
+                          fill="#16162a" stroke="#2d2d44" stroke-width="1"/>
+                    <text x="155" y="165" fill="#888" font-size="10" text-anchor="middle">D#°</text>
+                    
+                    <!-- Центр -->
+                    <circle cx="200" cy="200" r="70" fill="#16162a" stroke="#2d2d44" stroke-width="1"/>
+                    <text x="200" y="190" fill="#FFD700" font-size="20" font-weight="bold" text-anchor="middle">A</text>
+                    <text x="200" y="210" fill="#888" font-size="11" text-anchor="middle">Major</text>
+                    
+                    <!-- Указатель на 12 часов -->
+                    <polygon points="200,35 195,25 205,25" fill="#FFD700" opacity="0.8"/>
+                </svg>
+            </div>
+            
+            <div class="legend">
+                <h2>🎨 Цветовая схема подсветки</h2>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFD700;"></div>
+                    <div class="legend-text">
+                        <strong>Ярко-жёлтый</strong>
+                        <span>Выбранный аккорд (тоника)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 215, 0, 0.3); border: 2px solid rgba(255, 215, 0, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-жёлтый</strong>
+                        <span>Мажорные аккорды гаммы (IV, V ступени)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(78, 205, 196, 0.3); border: 2px solid rgba(78, 205, 196, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-бирюзовый</strong>
+                        <span>Минорные аккорды гаммы (ii, iii, vi ступени)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(231, 76, 60, 0.3); border: 2px solid rgba(231, 76, 60, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-красный</strong>
+                        <span>Уменьшённый аккорд гаммы (vii° ступень)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2d2d44; border: 2px solid #3d3d5c;"></div>
+                    <div class="legend-text">
+                        <strong>Тёмно-серый</strong>
+                        <span>Аккорды вне текущей гаммы</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="changes">
+            <h2>📋 Планируемые изменения</h2>
+            
+            <div class="change-item">
+                <h3>1. Добавление третьего кольца (уменьшённые аккорды)</h3>
+                <p>
+                    Во внутреннем круге добавляется третье кольцо с уменьшёнными аккордами (vii° ступень). 
+                    Это кольцо располагается внутри среднего кольца (минорные аккорды).
+                </p>
+            </div>
+            
+            <div class="change-item">
+                <h3>2. Синхронизация подсветки между кругом и диатоническими аккордами</h3>
+                <p>
+                    При выборе аккорда (например, A) подсветка в круге синхронизируется с подсветкой 
+                    в списке диатонических аккордов:
+                </p>
+                <ul style="margin-top: 10px; margin-left: 20px; color: #ccc;">
+                    <li>Выбранный аккорд (A) - ярко-жёлтый в обоих местах</li>
+                    <li>Мажорные аккорды гаммы (D, E) - прозрачно-жёлтые</li>
+                    <li>Минорные аккорды гаммы (Bm, F#m, C#m) - прозрачно-бирюзовые</li>
+                    <li>Уменьшённый аккорд (G#°) - прозрачно-красный</li>
+                </ul>
+            </div>
+            
+            <div class="change-item">
+                <h3>3. Исправление поворота для минорных аккордов</h3>
+                <p>
+                    При выборе минорного аккорда (например, Am) как тоники, круг должен поворачиваться 
+                    так, чтобы этот минорный аккорд оказался на позиции 12 часов. 
+                    Сейчас поворот работает только для мажорных аккордов.
+                </p>
+            </div>
+            
+            <div class="example">
+                <h3>💡 Пример: Выбрана тональность A Major</h3>
+                <p style="color: #ccc; margin-bottom: 15px;">
+                    Диатонические аккорды тональности A Major:
+                </p>
+                <div class="example-grid">
+                    <div class="example-chord chord-selected">A (I)</div>
+                    <div class="example-chord chord-major">D (IV)</div>
+                    <div class="example-chord chord-major">E (V)</div>
+                    <div class="example-chord chord-minor">Bm (ii)</div>
+                    <div class="example-chord chord-minor">C#m (iii)</div>
+                    <div class="example-chord chord-minor">F#m (vi)</div>
+                    <div class="example-chord chord-dim">G#° (vii°)</div>
+                </div>
+                <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
+                    Все эти аккорды будут подсвечены соответствующими цветами в круге
+                </p>
+            </div>
+        </div>
+        
+        <div class="approval">
+            <h3>✅ Подтверждение согласования</h3>
+            <p>Если всё верно, напишите:</p>
+            <code>согласовано</code>
+            <p style="margin-top: 15px; font-size: 0.9em;">
+                После этого я начну реализацию изменений
+            </p>
+        </div>
+    </div>
+</body>
+</html>
