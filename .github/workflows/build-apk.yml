@@ -47,7 +47,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
 
       # 4. Android SDK is pre-installed on ubuntu-latest
-      #    We just need to accept licenses and install required components
       - name: 🤖 Configure Android SDK
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
@@ -68,26 +67,47 @@ jobs:
 
       # 6. Build web application
       - name: 🏗️ Build web app
-        run: npm run build
+        run: |
+          npm run build
+          echo "✅ Web build completed"
+          ls -lh dist/
 
       # 7. Install Capacitor
       - name: 🔌 Install Capacitor
         run: |
           npm install --save @capacitor/core @capacitor/cli @capacitor/android
+          echo "✅ Capacitor installed"
           npx cap --version
 
-      # 8. Add Android platform
-      - name: 📱 Add Android platform
+      # 8. Initialize Capacitor and add Android platform
+      - name: 📱 Initialize Capacitor
         run: |
-          if [ ! -d "android" ]; then
-            npx cap add android
-          else
-            echo "Android platform already exists, skipping add"
+          # Initialize Capacitor if not already done
+          if [ ! -f "capacitor.config.ts" ]; then
+            echo "❌ capacitor.config.ts not found!"
+            exit 1
           fi
+          
+          # Remove android directory if exists to start fresh
+          rm -rf android
+          
+          # Add Android platform
+          npx cap add android
+          echo "✅ Android platform added"
+          ls -la android/
 
       # 9. Sync web assets to native project
       - name: 🔄 Sync Capacitor
-        run: npx cap sync android
+        run: |
+          npx cap sync android
+          echo "✅ Capacitor sync completed"
+          
+          # Verify sync
+          if [ ! -d "android/app/src/main/assets/public" ]; then
+            echo "❌ Web assets not synced properly!"
+            exit 1
+          fi
+          echo "✅ Web assets verified"
 
       # 10. Make gradlew executable
       - name: 🔐 Make gradlew executable
@@ -97,19 +117,113 @@ jobs:
       - name: 📝 Configure Android SDK path
         run: |
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "✅ local.properties created"
           cat android/local.properties
+          
+          # Copy custom gradle.properties for better memory settings
+          if [ -f "android-gradle.properties" ]; then
+            cp android-gradle.properties android/gradle.properties
+            echo "✅ Custom gradle.properties applied"
+          fi
 
-      # 12. Build APK
+      # 12. Fix common Capacitor issues
+      - name: 🔧 Fix common Capacitor issues
+        run: |
+          cd android
+          
+          echo "=== Checking for common issues ==="
+          
+          # Fix: Ensure compileSdk and targetSdk are set correctly
+          if grep -q "compileSdkVersion" app/build.gradle; then
+            echo "✅ compileSdkVersion found"
+          else
+            echo "⚠️  compileSdkVersion not found, may cause issues"
+          fi
+          
+          # Fix: Ensure minSdkVersion is compatible
+          if grep -q "minSdkVersion" app/build.gradle; then
+            MIN_SDK=$(grep "minSdkVersion" app/build.gradle | grep -oE '[0-9]+')
+            echo "✅ minSdkVersion: $MIN_SDK"
+            if [ "$MIN_SDK" -lt 22 ]; then
+              echo "⚠️  minSdkVersion is too low, updating to 22"
+              sed -i 's/minSdkVersion [0-9]*/minSdkVersion 22/' app/build.gradle
+            fi
+          fi
+          
+          # Fix: Ensure namespace is set (required for AGP 8+)
+          if ! grep -q "namespace" app/build.gradle && ! grep -q "namespace" app/build.gradle.kts; then
+            echo "⚠️  namespace not found, adding it"
+            # Add namespace to app/build.gradle
+            if [ -f "app/build.gradle" ]; then
+              sed -i '/android {/a\    namespace "com.circleoffifths.guitar"' app/build.gradle
+            fi
+          fi
+          
+          echo "✅ Common issues check completed"
+          
+          # Clean build directory
+          echo ""
+          echo "=== Cleaning build directory ==="
+          rm -rf app/build
+          rm -rf build
+          echo "✅ Build directory cleaned"
+
+      # 13. Check Gradle version and dependencies
+      - name: 🔍 Check Gradle configuration
+        run: |
+          cd android
+          echo "=== Gradle Version ==="
+          ./gradlew --version
+          
+          echo ""
+          echo "=== Project Structure ==="
+          find . -maxdepth 3 -name "build.gradle*" -o -name "settings.gradle*" -o -name "gradle.properties" | grep -v ".gradle/"
+          
+          echo ""
+          echo "=== Root build.gradle ==="
+          cat build.gradle || cat build.gradle.kts
+          
+          echo ""
+          echo "=== App build.gradle ==="
+          cat app/build.gradle || cat app/build.gradle.kts
+          
+          echo ""
+          echo "=== gradle.properties ==="
+          cat gradle.properties
+          
+          echo ""
+          echo "=== Capacitor Variables ==="
+          cat variables.gradle 2>/dev/null || echo "variables.gradle not found"
+          
+          echo ""
+          echo "=== Check web assets ==="
+          ls -lh app/src/main/assets/public/ 2>/dev/null || echo "Web assets not found!"
+          
+          echo ""
+          echo "=== Check AndroidManifest.xml ==="
+          head -30 app/src/main/AndroidManifest.xml
+
+      # 14. Build APK with detailed logging
       - name: 🔨 Build APK
         run: |
           cd android
-          if [ "${{ github.event.inputs.build_type }}" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            ./gradlew assembleRelease --no-daemon --stacktrace
-          else
-            ./gradlew assembleDebug --no-daemon --stacktrace
+          
+          BUILD_TYPE="${{ github.event.inputs.build_type }}"
+          if [ -z "$BUILD_TYPE" ]; then
+            BUILD_TYPE="debug"
           fi
+          
+          echo "Building $BUILD_TYPE APK..."
+          
+          if [ "$BUILD_TYPE" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee gradle-build.log
+          else
+            ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee gradle-build.log
+          fi
+          
+          echo "✅ Build completed"
 
-      # 13. Find APK file
+      # 15. Find APK file
       - name: 🔍 Locate APK
         id: find_apk
         run: |
@@ -121,7 +235,15 @@ jobs:
           
           if [ -z "$APK_PATH" ]; then
             echo "❌ APK file not found!"
-            find android/app/build/outputs -name "*.apk" -type f 2>/dev/null || true
+            echo "=== Searching for APK files ==="
+            find android/app/build/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+            
+            echo "=== Checking build directory ==="
+            ls -la android/app/build/outputs/ 2>/dev/null || echo "outputs directory not found"
+            
+            echo "=== Last 100 lines of Gradle log ==="
+            tail -100 android/gradle-build.log 2>/dev/null || echo "No gradle log found"
+            
             exit 1
           fi
           
@@ -129,7 +251,7 @@ jobs:
           echo "✅ APK found at: $APK_PATH"
           ls -lh "$APK_PATH"
 
-      # 14. Upload APK as artifact
+      # 16. Upload APK as artifact
       - name: 📤 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -138,7 +260,18 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      # 15. Create Release on tag push
+      # 17. Upload Gradle logs on failure
+      - name: 📤 Upload Gradle logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-logs
+          path: |
+            android/gradle-build.log
+            android/app/build/reports/
+          retention-days: 7
+
+      # 18. Create Release on tag push
       - name: 🚀 Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -150,7 +283,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 16. Summary
+      # 19. Summary
       - name: 📊 Build Summary
         if: always()
         run: |
@@ -168,5 +301,5 @@ jobs:
             APK_SIZE=$(du -h "${{ steps.find_apk.outputs.apk_path }}" | cut -f1)
             echo "✅ **APK built successfully** — Size: $APK_SIZE" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **APK build failed**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **APK build failed** — Check logs for details" >> $GITHUB_STEP_SUMMARY
           fi

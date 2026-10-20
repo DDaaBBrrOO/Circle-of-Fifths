@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appName: 'Circle of Fifths',
   webDir: 'dist',
   server: {
-    // Используем https схему для Android
     androidScheme: 'https',
   },
   android: {
