@@ -5,7 +5,8 @@ interface GuitarNeckProps {
   shape: ChordShape;
 }
 
-const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e'];
+// String names from top (1st, thin) to bottom (6th, thick)
+const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E'];
 const NUM_FRETS_DISPLAY = 5;
 
 const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
@@ -13,10 +14,10 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
 
   // SVG dimensions
   const svgWidth = 240;
-  const svgHeight = 240;
+  const svgHeight = 250;
   const marginLeft = 35;
-  const marginRight = 15;
-  const marginTop = 35;
+  const marginRight = 20;
+  const marginTop = 40;
   const marginBottom = 25;
 
   const neckWidth = svgWidth - marginLeft - marginRight;
@@ -25,7 +26,7 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
   const stringSpacing = neckHeight / 5;
   const fretWidth = neckWidth / NUM_FRETS_DISPLAY;
 
-  // String Y positions (top to bottom: low E to high e)
+  // String Y positions (top to bottom: 1st string e to 6th string E)
   const getStringY = (stringIdx: number): number => {
     return marginTop + stringIdx * stringSpacing;
   };
@@ -35,14 +36,14 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
     return marginLeft + fret * fretWidth;
   };
 
+  // Determine the display base fret
+  const maxFret = Math.max(...frets.filter(f => f > 0));
+  const displayBaseFret = maxFret <= 5 ? 1 : baseFret;
+
   // Get the display fret for a given fretted note
   const getDisplayFret = (fret: number): number => {
     return fret - displayBaseFret + 1;
   };
-
-  // Determine the display base fret
-  const maxFret = Math.max(...frets.filter(f => f > 0));
-  const displayBaseFret = maxFret <= 5 ? 1 : baseFret;
 
   return (
     <div className="flex flex-col items-center">
@@ -72,7 +73,7 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
           />
         ))}
 
-        {/* Strings (horizontal lines) */}
+        {/* Strings (horizontal lines) - 1st (thin) at top, 6th (thick) at bottom */}
         {Array.from({ length: 6 }, (_, i) => (
           <line
             key={`string-${i}`}
@@ -81,19 +82,19 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
             x2={marginLeft + neckWidth}
             y2={getStringY(i)}
             stroke="#c0c0c0"
-            strokeWidth={1.5 - i * 0.15}
+            strokeWidth={1 + i * 0.2} // Thicker strings at bottom
             opacity={0.8}
           />
         ))}
 
-        {/* String names (right side) */}
+        {/* String names (left side) */}
         {Array.from({ length: 6 }, (_, i) => (
           <text
             key={`sname-${i}`}
-            x={marginLeft + neckWidth + 10}
+            x={marginLeft - 12}
             y={getStringY(i) + 4}
             textAnchor="middle"
-            fill="#666"
+            fill="#888"
             fontSize="10"
             fontFamily="monospace"
           >
@@ -106,10 +107,10 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
           <text
             key={`fretnum-${i}`}
             x={getFretX(i) + fretWidth / 2}
-            y={marginTop - 12}
+            y={marginTop - 15}
             textAnchor="middle"
-            fill="#555"
-            fontSize="9"
+            fill="#666"
+            fontSize="10"
           >
             {displayBaseFret + i}
           </text>
@@ -123,9 +124,9 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
               <circle
                 key={`marker-${fretNum}`}
                 cx={getFretX(displayFret - 1) + fretWidth / 2}
-                cy={marginTop + neckHeight + 12}
+                cy={marginTop + neckHeight + 15}
                 r="3"
-                fill="#444"
+                fill="#555"
               />
             );
           }
@@ -162,11 +163,11 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
         {/* Finger positions */}
         {frets.map((fret, stringIdx) => {
           if (fret === -1) {
-            // Muted string - show X above nut
+            // Muted string - show X to the left of nut
             return (
               <g key={`pos-${stringIdx}`}>
                 <text
-                  x={marginLeft - 15}
+                  x={marginLeft - 25}
                   y={getStringY(stringIdx) + 4}
                   textAnchor="middle"
                   fill="#e74c3c"
@@ -179,11 +180,11 @@ const GuitarNeck: React.FC<GuitarNeckProps> = ({ shape }) => {
             );
           }
           if (fret === 0) {
-            // Open string - show O above nut
+            // Open string - show O to the left of nut
             return (
               <g key={`pos-${stringIdx}`}>
                 <circle
-                  cx={marginLeft - 15}
+                  cx={marginLeft - 25}
                   cy={getStringY(stringIdx)}
                   r="5"
                   fill="none"
