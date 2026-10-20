@@ -175,17 +175,7 @@ jobs:
           if [ -f "app/build.gradle" ]; then
             # Add resolution strategy to force consistent Kotlin versions
             # and exclude old jdk7/jdk8 modules
-            cat >> app/build.gradle << 'EOF'
-
-// Fix Kotlin stdlib duplicate classes conflict
-configurations.all {
-    resolutionStrategy {
-        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
-    }
-}
-EOF
+            printf "\n\n// Fix Kotlin stdlib duplicate classes conflict\nconfigurations.all {\n    resolutionStrategy {\n        force \"org.jetbrains.kotlin:kotlin-stdlib:1.9.24\"\n        force \"org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24\"\n        force \"org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24\"\n    }\n}\n" >> app/build.gradle
             echo "✅ Kotlin stdlib conflict resolution added"
           fi
           

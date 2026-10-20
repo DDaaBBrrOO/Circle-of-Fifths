@@ -35,6 +35,36 @@ sdk use java 21.0.2-zulu
 
 ---
 
+## Ошибка: `Invalid workflow file: YAML syntax error`
+
+### Проблема
+```
+Invalid workflow file: .github/workflows/build-apk.yml#L180
+You have an error in your yaml syntax on line 180
+```
+
+### Причина
+YAML парсер GitHub Actions не может обработать bash heredoc (`<< 'EOF'`) с одинарными кавычками внутри.
+
+### Решение
+Используйте `printf` вместо heredoc:
+
+```yaml
+# ❌ Неправильно (вызывает YAML ошибку):
+cat >> app/build.gradle << 'EOF'
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+    }
+}
+EOF
+
+# ✅ Правильно:
+printf "\nconfigurations.all {\n    resolutionStrategy {\n        force \"org.jetbrains.kotlin:kotlin-stdlib:1.9.24\"\n    }\n}\n" >> app/build.gradle
+```
+
+---
+
 ## Ошибка: `Duplicate class kotlin.collections.jdk8.CollectionsJDK8Kt`
 
 ### Проблема
