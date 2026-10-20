@@ -90,10 +90,14 @@ function App() {
           </div>
           <button
             onClick={toggleLanguage}
-            className="px-2 py-1.5 rounded-full text-xs font-bold bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 transition-all"
+            className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+              language === 'ru'
+                ? 'bg-blue-500/20 text-blue-300 border border-blue-400/40'
+                : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+            }`}
             title={t('language')}
           >
-            {language === 'en' ? 'RU' : 'EN'}
+            {language === 'en' ? 'EN' : 'RU'}
           </button>
         </div>
       </header>
