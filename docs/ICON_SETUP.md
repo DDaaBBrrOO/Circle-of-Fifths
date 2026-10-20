@@ -108,10 +108,12 @@ cd android
 node scripts/generate-icons.js
 ```
 
-Этот скрипт:
+Этот скрипт использует ES-модули (соответствует `"type": "module"` в package.json) и:
 - Конвертирует `public/icon.svg` в PNG для всех плотностей экрана
 - Создаёт обычные и круглые иконки
 - Настраивает Adaptive Icon конфигурацию
+
+**Примечание:** Скрипт использует библиотеку `sharp` для конвертации SVG в PNG, которая устанавливается через `npm install`.
 
 ### Онлайн-генераторы иконок
 
@@ -143,6 +145,23 @@ npm install
 ```bash
 npm uninstall sharp
 npm install sharp
+```
+
+### Ошибка: "require is not defined in ES module scope"
+
+Эта ошибка возникает, если скрипт использует `require()` в проекте с `"type": "module"` в package.json.
+
+**Решение:** Скрипт `scripts/generate-icons.js` уже обновлён для использования ES-модулей (`import` вместо `require`). Убедитесь, что вы используете последнюю версию скрипта из репозитория.
+
+Если вы создали свой скрипт, используйте синтаксис ES-модулей:
+```javascript
+import sharp from 'sharp';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 ```
 
 ### Ошибка: "Source icon not found at public/icon.svg"
