@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Circle of Fifths - Обновлённая версия с римскими цифрами</title>
+    <title>Circle of Fifths - Концептуальная схема</title>
     <style>
         * {
             margin: 0;
@@ -64,12 +64,160 @@
             font-size: 1.5em;
         }
         
-        .circle-svg {
+        .circle-concept {
+            position: relative;
             width: 100%;
             max-width: 500px;
             margin: 0 auto;
+            aspect-ratio: 1;
+        }
+        
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ring-outer {
+            width: 100%;
+            height: 100%;
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .ring-middle {
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        .ring-inner {
+            width: 45%;
+            height: 45%;
+            top: 27.5%;
+            left: 27.5%;
+            border-color: #E74C3C;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
+        .ring-center {
+            width: 25%;
+            height: 25%;
+            top: 37.5%;
+            left: 37.5%;
+            border-color: #888;
+            background: #16162a;
+            flex-direction: column;
+        }
+        
+        .ring-label {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+        
+        .label-outer {
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+        }
+        
+        .label-middle {
+            top: 50%;
+            right: -120px;
+            transform: translateY(-50%);
+            color: #4ECDC4;
+        }
+        
+        .label-inner {
+            bottom: 50%;
+            right: -120px;
+            transform: translateY(50%);
+            color: #E74C3C;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .center-text .key {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .center-text .type {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .chord-example {
+            position: absolute;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        .chord-name {
+            font-size: 18px;
+            font-weight: bold;
             display: block;
         }
+        
+        .chord-degree {
+            font-size: 11px;
+            display: block;
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+        
+        .chord-selected {
+            background: #FFD700;
+            color: #0f0f1e;
+        }
+        
+        .chord-selected .chord-degree {
+            color: #0f0f1e;
+        }
+        
+        .chord-major {
+            background: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+        
+        .chord-minor {
+            background: rgba(78, 205, 196, 0.3);
+            color: #4ECDC4;
+            border: 2px solid rgba(78, 205, 196, 0.5);
+        }
+        
+        .chord-dim {
+            background: rgba(231, 76, 60, 0.3);
+            color: #E74C3C;
+            border: 2px solid rgba(231, 76, 60, 0.5);
+        }
+        
+        .example-1 { top: 5%; left: 50%; transform: translateX(-50%); }
+        .example-2 { top: 20%; right: 10%; }
+        .example-3 { top: 20%; left: 10%; }
+        .example-4 { top: 45%; left: 20%; }
+        .example-5 { top: 45%; right: 20%; }
+        .example-6 { top: 65%; right: 25%; }
+        .example-7 { top: 55%; left: 35%; }
         
         .legend {
             background: #1a1a2e;
@@ -199,122 +347,100 @@
             color: #4ECDC4;
             margin-bottom: 15px;
         }
+        
+        .chord-demo {
+            display: inline-block;
+            text-align: center;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+        }
+        
+        .chord-demo .name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFD700;
+            display: block;
+        }
+        
+        .chord-demo .degree {
+            font-size: 12px;
+            color: #FFD700;
+            display: block;
+            margin-top: 3px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎸 Circle of Fifths - Обновлённая версия</h1>
+        <h1>🎸 Circle of Fifths - Концептуальная схема</h1>
         <p class="subtitle">Проект для согласования перед реализацией</p>
         
         <div class="main-content">
             <div class="circle-section">
-                <h2>🎯 Структура круга с римскими цифрами</h2>
-                <svg class="circle-svg" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Background -->
-                    <circle cx="250" cy="250" r="245" fill="#0f0f1e" stroke="#2d2d44" stroke-width="2"/>
+                <h2>🎯 Структура круга (концепт)</h2>
+                <div class="circle-concept">
+                    <!-- Внешнее кольцо -->
+                    <div class="ring ring-outer">
+                        <div class="ring-label label-outer">Внешнее: Мажорные аккорды</div>
+                    </div>
                     
-                    <!-- Внешнее кольцо - Мажорные аккорды -->
-                    <circle cx="250" cy="250" r="240" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/>
-                    <circle cx="250" cy="250" r="180" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/>
+                    <!-- Среднее кольцо -->
+                    <div class="ring ring-middle">
+                        <div class="ring-label label-middle">Среднее: Минорные аккорды</div>
+                    </div>
                     
-                    <!-- Среднее кольцо - Минорные аккорды -->
-                    <circle cx="250" cy="250" r="180" fill="none" stroke="#4ECDC4" stroke-width="2" opacity="0.3"/>
-                    <circle cx="250" cy="250" r="130" fill="none" stroke="#4ECDC4" stroke-width="2" opacity="0.3"/>
-                    
-                    <!-- Внутреннее кольцо - Уменьшённые аккорды -->
-                    <circle cx="250" cy="250" r="130" fill="none" stroke="#E74C3C" stroke-width="2" opacity="0.3"/>
-                    <circle cx="250" cy="250" r="90" fill="none" stroke="#E74C3C" stroke-width="2" opacity="0.3"/>
+                    <!-- Внутреннее кольцо -->
+                    <div class="ring ring-inner">
+                        <div class="ring-label label-inner">Внутреннее: Уменьшённые аккорды</div>
+                    </div>
                     
                     <!-- Центр -->
-                    <circle cx="250" cy="250" r="90" fill="#16162a" stroke="#2d2d44" stroke-width="2"/>
+                    <div class="ring ring-center">
+                        <div class="center-text">
+                            <div class="key">A</div>
+                            <div class="type">Major</div>
+                        </div>
+                    </div>
                     
-                    <!-- Подсветка для A Major -->
-                    <!-- A (I) - ярко-жёлтый -->
-                    <path d="M 250 10 A 240 240 0 0 1 370 40 L 330 90 A 180 180 0 0 0 250 70 Z" 
-                          fill="#FFD700" opacity="0.8"/>
+                    <!-- Примеры аккордов с подстрочными римскими цифрами -->
+                    <div class="chord-example chord-selected example-1">
+                        <span class="chord-name">A</span>
+                        <span class="chord-degree">I</span>
+                    </div>
                     
-                    <!-- D (IV) - прозрачно-жёлтый -->
-                    <path d="M 370 40 A 240 240 0 0 1 450 130 L 390 160 A 180 180 0 0 0 330 90 Z" 
-                          fill="#FFD700" opacity="0.3"/>
+                    <div class="chord-example chord-major example-2">
+                        <span class="chord-name">D</span>
+                        <span class="chord-degree">IV</span>
+                    </div>
                     
-                    <!-- E (V) - прозрачно-жёлтый -->
-                    <path d="M 130 40 A 240 240 0 0 1 250 10 L 250 70 A 180 180 0 0 0 170 90 Z" 
-                          fill="#FFD700" opacity="0.3"/>
+                    <div class="chord-example chord-major example-3">
+                        <span class="chord-name">E</span>
+                        <span class="chord-degree">V</span>
+                    </div>
                     
-                    <!-- Bm (ii) - прозрачно-бирюзовый -->
-                    <path d="M 170 90 A 180 180 0 0 1 250 70 L 250 120 A 130 130 0 0 0 190 135 Z" 
-                          fill="#4ECDC4" opacity="0.3"/>
+                    <div class="chord-example chord-minor example-4">
+                        <span class="chord-name">Bm</span>
+                        <span class="chord-degree">ii</span>
+                    </div>
                     
-                    <!-- F#m (vi) - прозрачно-бирюзовый -->
-                    <path d="M 250 70 A 180 180 0 0 1 330 90 L 310 135 A 130 130 0 0 0 250 120 Z" 
-                          fill="#4ECDC4" opacity="0.3"/>
+                    <div class="chord-example chord-minor example-5">
+                        <span class="chord-name">C#m</span>
+                        <span class="chord-degree">iii</span>
+                    </div>
                     
-                    <!-- C#m (iii) - прозрачно-бирюзовый -->
-                    <path d="M 330 90 A 180 180 0 0 1 390 160 L 350 180 A 130 130 0 0 0 310 135 Z" 
-                          fill="#4ECDC4" opacity="0.3"/>
+                    <div class="chord-example chord-minor example-6">
+                        <span class="chord-name">F#m</span>
+                        <span class="chord-degree">vi</span>
+                    </div>
                     
-                    <!-- G#° (vii°) - прозрачно-красный -->
-                    <path d="M 190 135 A 130 130 0 0 1 250 120 L 250 160 A 90 90 0 0 0 210 165 Z" 
-                          fill="#E74C3C" opacity="0.3"/>
-                    
-                    <!-- Текст мажорных аккордов с римскими цифрами -->
-                    <text x="310" y="55" fill="#0f0f1e" font-size="12" font-weight="bold" text-anchor="middle">I</text>
-                    <text x="310" y="75" fill="#0f0f1e" font-size="20" font-weight="bold" text-anchor="middle">A</text>
-                    
-                    <text x="410" y="95" fill="#FFD700" font-size="10" text-anchor="middle">IV</text>
-                    <text x="410" y="115" fill="#FFD700" font-size="16" font-weight="bold" text-anchor="middle">D</text>
-                    
-                    <text x="190" y="95" fill="#FFD700" font-size="10" text-anchor="middle">V</text>
-                    <text x="190" y="115" fill="#FFD700" font-size="16" font-weight="bold" text-anchor="middle">E</text>
-                    
-                    <!-- Остальные мажорные (без подсветки) -->
-                    <text x="460" y="250" fill="#666" font-size="16" text-anchor="middle">B</text>
-                    <text x="420" y="380" fill="#666" font-size="16" text-anchor="middle">F#</text>
-                    <text x="310" y="450" fill="#666" font-size="16" text-anchor="middle">C#</text>
-                    <text x="190" y="450" fill="#666" font-size="16" text-anchor="middle">G#</text>
-                    <text x="80" y="380" fill="#666" font-size="16" text-anchor="middle">Eb</text>
-                    <text x="40" y="250" fill="#666" font-size="16" text-anchor="middle">Bb</text>
-                    <text x="90" y="115" fill="#666" font-size="16" text-anchor="middle">F</text>
-                    
-                    <!-- Текст минорных аккордов с римскими цифрами -->
-                    <text x="250" y="95" fill="#4ECDC4" font-size="9" text-anchor="middle">vi</text>
-                    <text x="250" y="110" fill="#4ECDC4" font-size="14" font-weight="bold" text-anchor="middle">F#m</text>
-                    
-                    <text x="210" y="125" fill="#4ECDC4" font-size="9" text-anchor="middle">ii</text>
-                    <text x="210" y="140" fill="#4ECDC4" font-size="14" font-weight="bold" text-anchor="middle">Bm</text>
-                    
-                    <text x="340" y="155" fill="#4ECDC4" font-size="9" text-anchor="middle">iii</text>
-                    <text x="340" y="170" fill="#4ECDC4" font-size="14" font-weight="bold" text-anchor="middle">C#m</text>
-                    
-                    <!-- Остальные минорные (без подсветки) -->
-                    <text x="370" y="220" fill="#555" font-size="12" text-anchor="middle">G#m</text>
-                    <text x="350" y="300" fill="#555" font-size="12" text-anchor="middle">Ebm</text>
-                    <text x="250" y="350" fill="#555" font-size="12" text-anchor="middle">Bbm</text>
-                    <text x="150" y="300" fill="#555" font-size="12" text-anchor="middle">Fm</text>
-                    <text x="130" y="220" fill="#555" font-size="12" text-anchor="middle">Cm</text>
-                    <text x="160" y="155" fill="#555" font-size="12" text-anchor="middle">Gm</text>
-                    <text x="290" y="125" fill="#555" font-size="12" text-anchor="middle">Dm</text>
-                    
-                    <!-- Текст уменьшённых аккордов с римскими цифрами -->
-                    <text x="230" y="150" fill="#E74C3C" font-size="8" text-anchor="middle">vii°</text>
-                    <text x="230" y="162" fill="#E74C3C" font-size="11" font-weight="bold" text-anchor="middle">G#°</text>
-                    
-                    <!-- Остальные уменьшённые (без подсветки) -->
-                    <text x="270" y="150" fill="#555" font-size="10" text-anchor="middle">D#°</text>
-                    <text x="300" y="190" fill="#555" font-size="10" text-anchor="middle">A#°</text>
-                    <text x="290" y="240" fill="#555" font-size="10" text-anchor="middle">F°</text>
-                    <text x="250" y="270" fill="#555" font-size="10" text-anchor="middle">C°</text>
-                    <text x="210" y="240" fill="#555" font-size="10" text-anchor="middle">G°</text>
-                    <text x="200" y="190" fill="#555" font-size="10" text-anchor="middle">B°</text>
-                    <text x="270" y="162" fill="#555" font-size="10" text-anchor="middle">E°</text>
-                    
-                    <!-- Центр - информация о тональности -->
-                    <text x="250" y="240" fill="#FFD700" font-size="32" font-weight="bold" text-anchor="middle">A</text>
-                    <text x="250" y="270" fill="#888" font-size="14" text-anchor="middle">Major</text>
-                    
-                    <!-- Указатель на 12 часов -->
-                    <polygon points="250,5 245,-5 255,-5" fill="#FFD700" opacity="0.8"/>
-                </svg>
+                    <div class="chord-example chord-dim example-7">
+                        <span class="chord-name">G#°</span>
+                        <span class="chord-degree">vii°</span>
+                    </div>
+                </div>
             </div>
             
             <div class="legend">
@@ -361,18 +487,31 @@
                 </div>
                 
                 <div class="feature-highlight">
-                    <h3>✨ Новая функция: Римские цифры</h3>
-                    <p style="color: #ccc; line-height: 1.6;">
-                        Теперь в каждом секторе круга отображаются римские цифры, показывающие ступень гаммы:
+                    <h3>✨ Подстрочные римские цифры</h3>
+                    <p style="color: #ccc; line-height: 1.6; margin-bottom: 15px;">
+                        Римские цифры отображаются <strong>подстрочным шрифтом</strong> (меньшим размером) под обозначением аккорда:
                     </p>
-                    <ul style="margin-top: 10px; margin-left: 20px; color: #ccc;">
-                        <li><strong>I</strong> - тоника (выбранный аккорд)</li>
-                        <li><strong>ii, iii, vi</strong> - минорные ступени</li>
-                        <li><strong>IV, V</strong> - мажорные ступени</li>
-                        <li><strong>vii°</strong> - уменьшённая ступень</li>
-                    </ul>
-                    <p style="color: #aaa; margin-top: 10px; font-size: 0.9em;">
-                        Это помогает сразу видеть функцию каждого аккорда в тональности!
+                    <div style="text-align: center;">
+                        <div class="chord-demo">
+                            <span class="name">A</span>
+                            <span class="degree">I</span>
+                        </div>
+                        <div class="chord-demo">
+                            <span class="name">D</span>
+                            <span class="degree">IV</span>
+                        </div>
+                        <div class="chord-demo">
+                            <span class="name">Bm</span>
+                            <span class="degree">ii</span>
+                        </div>
+                        <div class="chord-demo">
+                            <span class="name">G#°</span>
+                            <span class="degree">vii°</span>
+                        </div>
+                    </div>
+                    <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
+                        Основной текст: название аккорда (крупный шрифт)<br>
+                        Подстрочный текст: римская цифра (мелкий шрифт, полупрозрачный)
                     </p>
                 </div>
             </div>
@@ -382,50 +521,52 @@
             <h2>📋 Планируемые изменения</h2>
             
             <div class="change-item">
-                <h3>1. Добавление третьего кольца (уменьшённые аккорды)</h3>
+                <h3>1. Три концентрических кольца</h3>
                 <p>
-                    Во внутреннем круге добавляется третье кольцо с уменьшёнными аккордами (vii° ступень). 
-                    Это кольцо располагается внутри среднего кольца (минорные аккорды).
-                </p>
-            </div>
-            
-            <div class="change-item">
-                <h3>2. Синхронизация подсветки между кругом и диатоническими аккордами</h3>
-                <p>
-                    При выборе аккорда (например, A) подсветка в круге синхронизируется с подсветкой 
-                    в списке диатонических аккордов.
-                </p>
-            </div>
-            
-            <div class="change-item">
-                <h3>3. Добавление римских цифр в сектора круга</h3>
-                <p>
-                    В каждом секторе круга для аккордов, входящих в выбранную тональность, 
-                    отображается римская цифра, показывающая ступень гаммы:
+                    Круг состоит из трёх колец:
                 </p>
                 <ul>
-                    <li>I - тоника (выбранный аккорд)</li>
-                    <li>ii, iii, vi - минорные ступени</li>
-                    <li>IV, V - мажорные ступени</li>
-                    <li>vii° - уменьшённая ступень</li>
+                    <li><strong>Внешнее</strong> — мажорные аккорды (C, G, D, A, E, B, F#, Db, Ab, Eb, Bb, F)</li>
+                    <li><strong>Среднее</strong> — минорные аккорды (Am, Em, Bm, F#m, C#m, G#m, D#m, Bbm, Fm, Cm, Gm, Dm)</li>
+                    <li><strong>Внутреннее</strong> — уменьшённые аккорды (B°, F#°, C#°, G#°, D#°, A#°, F°, C°, G°, D°, A°, E°)</li>
                 </ul>
             </div>
             
             <div class="change-item">
-                <h3>4. Исправление поворота для минорных аккордов</h3>
+                <h3>2. Подстрочные римские цифры</h3>
                 <p>
-                    При выборе минорного аккорда (например, Am) как тоники, круг должен поворачиваться 
-                    так, чтобы этот минорный аккорд оказался на позиции 12 часов.
+                    В каждом секторе круга для аккордов, входящих в выбранную тональность:
+                </p>
+                <ul>
+                    <li>Сверху: название аккорда (крупный шрифт)</li>
+                    <li>Снизу: римская цифра ступени (мелкий шрифт, полупрозрачный)</li>
+                </ul>
+                <p style="margin-top: 10px;">
+                    Пример: <strong>A</strong> с подстрочным <strong style="font-size: 0.7em; opacity: 0.7;">I</strong>
+                </p>
+            </div>
+            
+            <div class="change-item">
+                <h3>3. Синхронизация подсветки</h3>
+                <p>
+                    При выборе аккорда подсветка в круге синхронизируется с подсветкой в списке диатонических аккордов.
+                </p>
+            </div>
+            
+            <div class="change-item">
+                <h3>4. Поворот для минорных аккордов</h3>
+                <p>
+                    При выборе минорного аккорда как тоники, круг поворачивается так, чтобы этот аккорд оказался на позиции 12 часов.
                 </p>
             </div>
         </div>
         
         <div class="approval">
             <h3>✅ Подтверждение согласования</h3>
-            <p>Если всё верно, напишите:</p>
+            <p>Если концепция верна, напишите:</p>
             <code>согласовано</code>
             <p style="margin-top: 15px; font-size: 0.9em;">
-                После этого я начну реализацию изменений
+                После этого я начну реализацию изменений в коде
             </p>
         </div>
     </div>
