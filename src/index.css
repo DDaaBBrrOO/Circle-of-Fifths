@@ -3,6 +3,7 @@
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  box-sizing: border-box;
 }
 
 html, body {
@@ -12,12 +13,19 @@ html, body {
   height: 100%;
   overflow-x: hidden;
   background-color: #0f0f1e;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height для мобильных */
 }
 
 /* Slide up animation for bottom sheet */
@@ -66,5 +74,40 @@ button, svg text {
 @supports (-webkit-touch-callout: none) {
   .min-h-screen {
     min-height: -webkit-fill-available;
+  }
+}
+
+/* Responsive typography */
+@media (max-width: 360px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 481px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Safe area support for notched devices */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-horizontal {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
   }
 }

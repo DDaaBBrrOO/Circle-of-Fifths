@@ -225,6 +225,26 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'Bb°', frets: [0, 2, 3, 2, 1, 0], fingers: [0, 1, 3, 2, 1, 0], baseFret: 1 },
   ],
 
+  // ===== C# / Db minor =====
+  'C#m': [
+    { name: 'C#m (barre)', frets: [4, 4, 4, 6, 6, 4], fingers: [1, 1, 1, 3, 4, 1], barre: 4, baseFret: 4 },
+  ],
+  
+  // ===== D# / Eb minor =====
+  'D#m': [
+    { name: 'D#m (barre)', frets: [6, 6, 6, 8, 8, 6], fingers: [1, 1, 1, 3, 4, 1], barre: 6, baseFret: 6 },
+  ],
+  
+  // ===== G# / Ab minor =====
+  'G#m': [
+    { name: 'G#m (barre)', frets: [4, 4, 4, 6, 6, 4], fingers: [1, 1, 1, 3, 4, 1], barre: 4, baseFret: 4 },
+  ],
+  
+  // ===== A# / Bb minor =====
+  'A#m': [
+    { name: 'A#m (barre)', frets: [1, 1, 1, 3, 3, 1], fingers: [1, 1, 1, 3, 4, 1], barre: 1, baseFret: 1 },
+  ],
+
   // ===== Additional diminished chords =====
   'C#°': [
     { name: 'C#°', frets: [0, 1, 0, 2, 4, -1], fingers: [0, 1, 0, 2, 3, 0], baseFret: 1 },
