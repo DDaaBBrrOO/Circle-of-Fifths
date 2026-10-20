@@ -59,6 +59,12 @@
             margin-bottom: 40px;
         }
         
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .circle-section {
             background: #1a1a2e;
             border-radius: 20px;
@@ -70,6 +76,100 @@
             margin-bottom: 20px;
             color: #FFD700;
             font-size: 1.5em;
+        }
+        
+        .circle-diagram {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ring-outer {
+            width: 100%;
+            height: 100%;
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .ring-middle {
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        .ring-inner {
+            width: 45%;
+            height: 45%;
+            top: 27.5%;
+            left: 27.5%;
+            border-color: #E74C3C;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
+        .ring-center {
+            width: 25%;
+            height: 25%;
+            top: 37.5%;
+            left: 37.5%;
+            border-color: #888;
+            background: #16162a;
+            flex-direction: column;
+        }
+        
+        .ring-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .label-outer {
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+        }
+        
+        .label-middle {
+            top: 10%;
+            right: -80px;
+            color: #4ECDC4;
+        }
+        
+        .label-inner {
+            bottom: 10%;
+            right: -80px;
+            color: #E74C3C;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .center-text .key {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .center-text .type {
+            font-size: 12px;
+            color: #888;
         }
         
         .legend {
@@ -148,6 +248,16 @@
         .change-item p {
             color: #ccc;
             line-height: 1.6;
+        }
+        
+        .change-item ul {
+            margin-top: 10px;
+            margin-left: 20px;
+            color: #ccc;
+        }
+        
+        .change-item li {
+            margin-bottom: 5px;
         }
         
         .example {
@@ -242,71 +352,30 @@
         <div class="main-content">
             <div class="circle-section">
                 <h2>🎯 Структура круга (3 кольца)</h2>
-                <svg viewBox="0 0 400 400" width="100%" style="max-width: 400px; margin: 0 auto; display: block;">
-                    <!-- Background -->
-                    <circle cx="200" cy="200" r="195" fill="#1a1a2e" stroke="#2d2d44" stroke-width="2"/>
+                <div class="circle-diagram" style="aspect-ratio: 1;">
+                    <!-- Внешнее кольцо -->
+                    <div class="ring ring-outer">
+                        <div class="ring-label label-outer">Внешнее: Мажорные аккорды</div>
+                    </div>
                     
-                    <!-- Внешнее кольцо - Мажорные аккорды -->
-                    <!-- A (выбранный) - ярко-жёлтый -->
-                    <path d="M 200 20 A 180 180 0 0 1 290 47 L 260 87 A 140 140 0 0 0 200 60 Z" 
-                          fill="#FFD700" stroke="#FFD700" stroke-width="2"/>
-                    <text x="245" y="70" fill="#0f0f1e" font-size="16" font-weight="bold" text-anchor="middle">A</text>
+                    <!-- Среднее кольцо -->
+                    <div class="ring ring-middle">
+                        <div class="ring-label label-middle">Среднее: Минорные аккорды</div>
+                    </div>
                     
-                    <!-- D (мажорный) - прозрачно-жёлтый -->
-                    <path d="M 290 47 A 180 180 0 0 1 353 110 L 313 140 A 140 140 0 0 0 260 87 Z" 
-                          fill="rgba(255, 215, 0, 0.3)" stroke="rgba(255, 215, 0, 0.5)" stroke-width="2"/>
-                    <text x="310" y="95" fill="#FFD700" font-size="14" font-weight="bold" text-anchor="middle">D</text>
-                    
-                    <!-- E (мажорный) - прозрачно-жёлтый -->
-                    <path d="M 110 47 A 180 180 0 0 1 200 20 L 200 60 A 140 140 0 0 0 140 87 Z" 
-                          fill="rgba(255, 215, 0, 0.3)" stroke="rgba(255, 215, 0, 0.5)" stroke-width="2"/>
-                    <text x="155" y="70" fill="#FFD700" font-size="14" font-weight="bold" text-anchor="middle">E</text>
-                    
-                    <!-- Остальные мажорные - обычные -->
-                    <path d="M 353 110 A 180 180 0 0 1 380 200 L 340 200 A 140 140 0 0 0 313 140 Z" 
-                          fill="#2d2d44" stroke="#3d3d5c" stroke-width="1"/>
-                    <text x="350" y="165" fill="#e0e0e0" font-size="14" text-anchor="middle">B</text>
-                    
-                    <!-- Среднее кольцо - Минорные аккорды -->
-                    <!-- F#m (минорный) - прозрачно-бирюзовый -->
-                    <path d="M 260 87 A 140 140 0 0 1 313 140 L 273 170 A 100 100 0 0 0 235 125 Z" 
-                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
-                    <text x="275" y="135" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">F#m</text>
-                    
-                    <!-- Bm (минорный) - прозрачно-бирюзовый -->
-                    <path d="M 140 87 A 140 140 0 0 0 87 140 L 127 170 A 100 100 0 0 1 165 125 Z" 
-                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
-                    <text x="125" y="135" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">Bm</text>
-                    
-                    <!-- C#m (минорный) - прозрачно-бирюзовый -->
-                    <path d="M 313 140 A 140 140 0 0 1 340 200 L 300 200 A 100 100 0 0 0 273 170 Z" 
-                          fill="rgba(78, 205, 196, 0.3)" stroke="rgba(78, 205, 196, 0.5)" stroke-width="2"/>
-                    <text x="310" y="185" fill="#4ECDC4" font-size="12" font-weight="bold" text-anchor="middle">C#m</text>
-                    
-                    <!-- Остальные минорные - обычные -->
-                    <path d="M 87 140 A 140 140 0 0 0 60 200 L 100 200 A 100 100 0 0 1 127 170 Z" 
-                          fill="#1f1f35" stroke="#2d2d44" stroke-width="1"/>
-                    <text x="90" y="185" fill="#a0a0a0" font-size="11" text-anchor="middle">G#m</text>
-                    
-                    <!-- Внутреннее кольцо - Уменьшённые аккорды (НОВОЕ!) -->
-                    <!-- G#° (уменьшённый) - прозрачно-красный -->
-                    <path d="M 235 125 A 100 100 0 0 1 273 170 L 245 185 A 70 70 0 0 0 215 155 Z" 
-                          fill="rgba(231, 76, 60, 0.3)" stroke="rgba(231, 76, 60, 0.5)" stroke-width="2"/>
-                    <text x="245" y="165" fill="#E74C3C" font-size="11" font-weight="bold" text-anchor="middle">G#°</text>
-                    
-                    <!-- Остальные уменьшённые - обычные -->
-                    <path d="M 165 125 A 100 100 0 0 0 127 170 L 155 185 A 70 70 0 0 1 185 155 Z" 
-                          fill="#16162a" stroke="#2d2d44" stroke-width="1"/>
-                    <text x="155" y="165" fill="#888" font-size="10" text-anchor="middle">D#°</text>
+                    <!-- Внутреннее кольцо -->
+                    <div class="ring ring-inner">
+                        <div class="ring-label label-inner">Внутреннее: Уменьшённые аккорды</div>
+                    </div>
                     
                     <!-- Центр -->
-                    <circle cx="200" cy="200" r="70" fill="#16162a" stroke="#2d2d44" stroke-width="1"/>
-                    <text x="200" y="190" fill="#FFD700" font-size="20" font-weight="bold" text-anchor="middle">A</text>
-                    <text x="200" y="210" fill="#888" font-size="11" text-anchor="middle">Major</text>
-                    
-                    <!-- Указатель на 12 часов -->
-                    <polygon points="200,35 195,25 205,25" fill="#FFD700" opacity="0.8"/>
-                </svg>
+                    <div class="ring ring-center">
+                        <div class="center-text">
+                            <div class="key">A</div>
+                            <div class="type">Major</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="legend">
@@ -351,6 +420,25 @@
                         <span>Аккорды вне текущей гаммы</span>
                     </div>
                 </div>
+                
+                <div class="example">
+                    <h3>💡 Пример: Выбрана тональность A Major</h3>
+                    <p style="color: #ccc; margin-bottom: 15px;">
+                        Диатонические аккорды тональности A Major:
+                    </p>
+                    <div class="example-grid">
+                        <div class="example-chord chord-selected">A (I)</div>
+                        <div class="example-chord chord-major">D (IV)</div>
+                        <div class="example-chord chord-major">E (V)</div>
+                        <div class="example-chord chord-minor">Bm (ii)</div>
+                        <div class="example-chord chord-minor">C#m (iii)</div>
+                        <div class="example-chord chord-minor">F#m (vi)</div>
+                        <div class="example-chord chord-dim">G#° (vii°)</div>
+                    </div>
+                    <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
+                        Все эти аккорды будут подсвечены соответствующими цветами в круге
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -363,6 +451,15 @@
                     Во внутреннем круге добавляется третье кольцо с уменьшёнными аккордами (vii° ступень). 
                     Это кольцо располагается внутри среднего кольца (минорные аккорды).
                 </p>
+                <p style="margin-top: 10px;">
+                    <strong>Структура:</strong>
+                </p>
+                <ul>
+                    <li>Внешнее кольцо (180px) — мажорные аккорды</li>
+                    <li>Среднее кольцо (140px) — минорные аккорды</li>
+                    <li>Внутреннее кольцо (100px) — уменьшённые аккорды (НОВОЕ!)</li>
+                    <li>Центр (70px) — информация о выбранной тональности</li>
+                </ul>
             </div>
             
             <div class="change-item">
@@ -371,10 +468,10 @@
                     При выборе аккорда (например, A) подсветка в круге синхронизируется с подсветкой 
                     в списке диатонических аккордов:
                 </p>
-                <ul style="margin-top: 10px; margin-left: 20px; color: #ccc;">
+                <ul>
                     <li>Выбранный аккорд (A) - ярко-жёлтый в обоих местах</li>
                     <li>Мажорные аккорды гаммы (D, E) - прозрачно-жёлтые</li>
-                    <li>Минорные аккорды гаммы (Bm, F#m, C#m) - прозрачно-бирюзовые</li>
+                    <li>Минорные аккорды гаммы (Bm, C#m, F#m) - прозрачно-бирюзовые</li>
                     <li>Уменьшённый аккорд (G#°) - прозрачно-красный</li>
                 </ul>
             </div>
@@ -385,25 +482,6 @@
                     При выборе минорного аккорда (например, Am) как тоники, круг должен поворачиваться 
                     так, чтобы этот минорный аккорд оказался на позиции 12 часов. 
                     Сейчас поворот работает только для мажорных аккордов.
-                </p>
-            </div>
-            
-            <div class="example">
-                <h3>💡 Пример: Выбрана тональность A Major</h3>
-                <p style="color: #ccc; margin-bottom: 15px;">
-                    Диатонические аккорды тональности A Major:
-                </p>
-                <div class="example-grid">
-                    <div class="example-chord chord-selected">A (I)</div>
-                    <div class="example-chord chord-major">D (IV)</div>
-                    <div class="example-chord chord-major">E (V)</div>
-                    <div class="example-chord chord-minor">Bm (ii)</div>
-                    <div class="example-chord chord-minor">C#m (iii)</div>
-                    <div class="example-chord chord-minor">F#m (vi)</div>
-                    <div class="example-chord chord-dim">G#° (vii°)</div>
-                </div>
-                <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
-                    Все эти аккорды будут подсвечены соответствующими цветами в круге
                 </p>
             </div>
         </div>
