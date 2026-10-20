@@ -171,16 +171,16 @@
             border-radius: 8px;
         }
         
-        .chord-name {
+        .chord-text {
             font-size: 18px;
             font-weight: bold;
-            display: block;
+            display: inline-block;
         }
         
         .chord-degree {
             font-size: 11px;
-            display: block;
-            margin-top: 2px;
+            vertical-align: sub;
+            margin-left: 2px;
             opacity: 0.8;
         }
         
@@ -350,26 +350,13 @@
         
         .chord-demo {
             display: inline-block;
-            text-align: center;
             background: rgba(255, 215, 0, 0.2);
             padding: 10px 15px;
             border-radius: 8px;
             margin: 5px;
-        }
-        
-        .chord-demo .name {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
             color: #FFD700;
-            display: block;
-        }
-        
-        .chord-demo .degree {
-            font-size: 12px;
-            color: #FFD700;
-            display: block;
-            margin-top: 3px;
-            opacity: 0.7;
         }
     </style>
 </head>
@@ -405,40 +392,33 @@
                         </div>
                     </div>
                     
-                    <!-- Примеры аккордов с подстрочными римскими цифрами -->
+                    <!-- Примеры аккордов с подстрочными римскими цифрами (в той же строке) -->
                     <div class="chord-example chord-selected example-1">
-                        <span class="chord-name">A</span>
-                        <span class="chord-degree">I</span>
+                        <span class="chord-text">A<span class="chord-degree">I</span></span>
                     </div>
                     
                     <div class="chord-example chord-major example-2">
-                        <span class="chord-name">D</span>
-                        <span class="chord-degree">IV</span>
+                        <span class="chord-text">D<span class="chord-degree">IV</span></span>
                     </div>
                     
                     <div class="chord-example chord-major example-3">
-                        <span class="chord-name">E</span>
-                        <span class="chord-degree">V</span>
+                        <span class="chord-text">E<span class="chord-degree">V</span></span>
                     </div>
                     
                     <div class="chord-example chord-minor example-4">
-                        <span class="chord-name">Bm</span>
-                        <span class="chord-degree">ii</span>
+                        <span class="chord-text">Bm<span class="chord-degree">ii</span></span>
                     </div>
                     
                     <div class="chord-example chord-minor example-5">
-                        <span class="chord-name">C#m</span>
-                        <span class="chord-degree">iii</span>
+                        <span class="chord-text">C#m<span class="chord-degree">iii</span></span>
                     </div>
                     
                     <div class="chord-example chord-minor example-6">
-                        <span class="chord-name">F#m</span>
-                        <span class="chord-degree">vi</span>
+                        <span class="chord-text">F#m<span class="chord-degree">vi</span></span>
                     </div>
                     
                     <div class="chord-example chord-dim example-7">
-                        <span class="chord-name">G#°</span>
-                        <span class="chord-degree">vii°</span>
+                        <span class="chord-text">G#°<span class="chord-degree">vii°</span></span>
                     </div>
                 </div>
             </div>
@@ -489,29 +469,17 @@
                 <div class="feature-highlight">
                     <h3>✨ Подстрочные римские цифры</h3>
                     <p style="color: #ccc; line-height: 1.6; margin-bottom: 15px;">
-                        Римские цифры отображаются <strong>подстрочным шрифтом</strong> (меньшим размером) под обозначением аккорда:
+                        Римские цифры отображаются <strong>подстрочным шрифтом</strong> (меньшим размером) <strong>в той же строке</strong>, что и обозначение аккорда:
                     </p>
-                    <div style="text-align: center;">
-                        <div class="chord-demo">
-                            <span class="name">A</span>
-                            <span class="degree">I</span>
-                        </div>
-                        <div class="chord-demo">
-                            <span class="name">D</span>
-                            <span class="degree">IV</span>
-                        </div>
-                        <div class="chord-demo">
-                            <span class="name">Bm</span>
-                            <span class="degree">ii</span>
-                        </div>
-                        <div class="chord-demo">
-                            <span class="name">G#°</span>
-                            <span class="degree">vii°</span>
-                        </div>
+                    <div style="text-align: center; font-size: 24px; margin: 20px 0;">
+                        <span style="margin: 0 15px;">A<sub style="font-size: 14px; opacity: 0.7;">I</sub></span>
+                        <span style="margin: 0 15px;">D<sub style="font-size: 14px; opacity: 0.7;">IV</sub></span>
+                        <span style="margin: 0 15px;">Bm<sub style="font-size: 14px; opacity: 0.7;">ii</sub></span>
+                        <span style="margin: 0 15px;">G#°<sub style="font-size: 14px; opacity: 0.7;">vii°</sub></span>
                     </div>
                     <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
-                        Основной текст: название аккорда (крупный шрифт)<br>
-                        Подстрочный текст: римская цифра (мелкий шрифт, полупрозрачный)
+                        Название аккорда и римская цифра — в одной строке<br>
+                        Римская цифра отображается подстрочным шрифтом (меньше и ниже)
                     </p>
                 </div>
             </div>
@@ -538,12 +506,10 @@
                     В каждом секторе круга для аккордов, входящих в выбранную тональность:
                 </p>
                 <ul>
-                    <li>Сверху: название аккорда (крупный шрифт)</li>
-                    <li>Снизу: римская цифра ступени (мелкий шрифт, полупрозрачный)</li>
+                    <li>Название аккорда и римская цифра — <strong>в одной строке</strong></li>
+                    <li>Римская цифра отображается подстрочным шрифтом (меньше и ниже)</li>
+                    <li>Пример: A<sub style="font-size: 0.7em; opacity: 0.7;">I</sub>, D<sub style="font-size: 0.7em; opacity: 0.7;">IV</sub>, Bm<sub style="font-size: 0.7em; opacity: 0.7;">ii</sub></li>
                 </ul>
-                <p style="margin-top: 10px;">
-                    Пример: <strong>A</strong> с подстрочным <strong style="font-size: 0.7em; opacity: 0.7;">I</strong>
-                </p>
             </div>
             
             <div class="change-item">
