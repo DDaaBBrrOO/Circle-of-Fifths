@@ -174,7 +174,12 @@ jobs:
           echo "=== Cleaning build directory ==="
           rm -rf app/build
           rm -rf build
+          rm -rf .gradle
           echo "✅ Build directory cleaned"
+          
+          echo ""
+          echo "=== Android project structure ==="
+          find . -maxdepth 4 -type f \( -name "*.gradle" -o -name "*.properties" -o -name "*.xml" \) | grep -v ".gradle/" | sort
 
       # 13. Check Gradle version and dependencies
       - name: 🔍 Check Gradle configuration
@@ -185,19 +190,19 @@ jobs:
           
           echo ""
           echo "=== Project Structure ==="
-          find . -maxdepth 3 -name "build.gradle*" -o -name "settings.gradle*" -o -name "gradle.properties" | grep -v ".gradle/"
+          find . -maxdepth 3 \( -name "build.gradle*" -o -name "settings.gradle*" -o -name "gradle.properties" \) | grep -v ".gradle/"
           
           echo ""
           echo "=== Root build.gradle ==="
-          cat build.gradle || cat build.gradle.kts
+          cat build.gradle 2>/dev/null || cat build.gradle.kts 2>/dev/null || echo "No root build.gradle found"
           
           echo ""
           echo "=== App build.gradle ==="
-          cat app/build.gradle || cat app/build.gradle.kts
+          cat app/build.gradle 2>/dev/null || cat app/build.gradle.kts 2>/dev/null || echo "No app/build.gradle found"
           
           echo ""
           echo "=== gradle.properties ==="
-          cat gradle.properties
+          cat gradle.properties 2>/dev/null || echo "No gradle.properties found"
           
           echo ""
           echo "=== Capacitor Variables ==="
@@ -205,13 +210,60 @@ jobs:
           
           echo ""
           echo "=== Check web assets ==="
-          ls -lh app/src/main/assets/public/ 2>/dev/null || echo "Web assets not found!"
+          if [ -d "app/src/main/assets/public" ]; then
+            echo "✅ Web assets directory exists"
+            ls -lh app/src/main/assets/public/ | head -20
+          else
+            echo "❌ Web assets not found!"
+            echo "Checking alternative locations..."
+            find app/src/main -type d -name "public" 2>/dev/null || echo "No public directory found"
+          fi
           
           echo ""
           echo "=== Check AndroidManifest.xml ==="
-          head -30 app/src/main/AndroidManifest.xml
+          if [ -f "app/src/main/AndroidManifest.xml" ]; then
+            echo "✅ AndroidManifest.xml exists"
+            head -30 app/src/main/AndroidManifest.xml
+          else
+            echo "❌ AndroidManifest.xml not found!"
+          fi
+          
+          echo ""
+          echo "=== Environment Variables ==="
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "PATH: $PATH"
+          
+          echo ""
+          echo "=== Java Version ==="
+          java -version
+          
+          echo ""
+          echo "=== Gradle Wrapper Properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties 2>/dev/null || echo "No gradle-wrapper.properties found"
 
-      # 14. Build APK with detailed logging
+      # 14. Pre-build diagnostics
+      - name: 🔍 Pre-build diagnostics
+        run: |
+          cd android
+          
+          echo "=== Available Gradle Tasks ==="
+          ./gradlew tasks --no-daemon 2>&1 | head -100
+          
+          echo ""
+          echo "=== Project Dependencies ==="
+          ./gradlew app:dependencies --configuration debugCompileClasspath --no-daemon 2>&1 | head -150
+          
+          echo ""
+          echo "=== Build Variants ==="
+          ./gradlew app:tasks --group="build" --no-daemon 2>&1 | grep -i assemble || echo "No assemble tasks found"
+          
+          echo ""
+          echo "=== Dry Run Build ==="
+          ./gradlew assembleDebug --dry-run --no-daemon 2>&1 | tail -50
+
+      # 15. Build APK with detailed logging
       - name: 🔨 Build APK
         run: |
           cd android
@@ -221,20 +273,44 @@ jobs:
             BUILD_TYPE="debug"
           fi
           
-          echo "Building $BUILD_TYPE APK..."
+          echo "=========================================="
+          echo "Building $BUILD_TYPE APK"
+          echo "=========================================="
+          echo ""
           
+          # Try to build with maximum verbosity
           if [ "$BUILD_TYPE" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee gradle-build.log
+            ./gradlew assembleRelease --no-daemon --stacktrace --warning-mode all --no-build-cache 2>&1 | tee gradle-build.log
+            BUILD_EXIT_CODE=${PIPESTATUS[0]}
           else
-            ./gradlew assembleDebug --no-daemon --stacktrace --info 2>&1 | tee gradle-build.log
+            ./gradlew assembleDebug --no-daemon --stacktrace --warning-mode all --no-build-cache 2>&1 | tee gradle-build.log
+            BUILD_EXIT_CODE=${PIPESTATUS[0]}
           fi
           
-          echo "✅ Build completed"
+          echo ""
+          echo "=========================================="
+          echo "Build exit code: $BUILD_EXIT_CODE"
+          echo "=========================================="
+          
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "❌ Build failed!"
+            echo ""
+            echo "=== Last 200 lines of build log ==="
+            tail -200 gradle-build.log
+            echo ""
+            echo "=== Searching for ERROR in log ==="
+            grep -i "error\|failed\|exception" gradle-build.log | tail -50
+            exit 1
+          fi
+          
+          echo "✅ Build completed successfully"
 
-      # 15. Find APK file
+      # 16. Find APK file
       - name: 🔍 Locate APK
         id: find_apk
         run: |
+          echo "=== Searching for APK files ==="
+          
           if [ "${{ github.event.inputs.build_type }}" = "release" ] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
             APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" -type f | head -1)
           else
@@ -243,14 +319,21 @@ jobs:
           
           if [ -z "$APK_PATH" ]; then
             echo "❌ APK file not found!"
-            echo "=== Searching for APK files ==="
-            find android/app/build/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+            echo ""
+            echo "=== All files in build/outputs ==="
+            find android/app/build/outputs -type f 2>/dev/null || echo "outputs directory not found"
             
-            echo "=== Checking build directory ==="
-            ls -la android/app/build/outputs/ 2>/dev/null || echo "outputs directory not found"
+            echo ""
+            echo "=== Build directory structure ==="
+            ls -laR android/app/build/ 2>/dev/null | head -100 || echo "build directory not found"
             
-            echo "=== Last 100 lines of Gradle log ==="
-            tail -100 android/gradle-build.log 2>/dev/null || echo "No gradle log found"
+            echo ""
+            echo "=== Last 200 lines of Gradle log ==="
+            tail -200 android/gradle-build.log 2>/dev/null || echo "No gradle log found"
+            
+            echo ""
+            echo "=== Error lines from log ==="
+            grep -i "error\|failed\|exception" android/gradle-build.log 2>/dev/null | tail -50 || echo "No errors found in log"
             
             exit 1
           fi
@@ -259,7 +342,7 @@ jobs:
           echo "✅ APK found at: $APK_PATH"
           ls -lh "$APK_PATH"
 
-      # 16. Upload APK as artifact
+      # 17. Upload APK as artifact
       - name: 📤 Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -268,18 +351,22 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      # 17. Upload Gradle logs on failure
-      - name: 📤 Upload Gradle logs on failure
-        if: failure()
+      # 18. Upload Gradle logs (always)
+      - name: 📤 Upload Gradle logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gradle-logs
           path: |
             android/gradle-build.log
             android/app/build/reports/
+            android/app/build.gradle
+            android/build.gradle
+            android/gradle.properties
           retention-days: 7
+          if-no-files-found: warn
 
-      # 18. Create Release on tag push
+      # 19. Create Release on tag push
       - name: 🚀 Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -291,7 +378,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 19. Summary
+      # 20. Summary
       - name: 📊 Build Summary
         if: always()
         run: |
