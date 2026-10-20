@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle of Fifths - Концептуальная схема</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1e;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+            color: #FFD700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .circle-section {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+        }
+        
+        .circle-section h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .circle-concept {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+        
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ring-outer {
+            width: 100%;
+            height: 100%;
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        .ring-middle {
+            width: 70%;
+            height: 70%;
+            top: 15%;
+            left: 15%;
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.05);
+        }
+        
+        .ring-inner {
+            width: 45%;
+            height: 45%;
+            top: 27.5%;
+            left: 27.5%;
+            border-color: #E74C3C;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        
+        .ring-center {
+            width: 25%;
+            height: 25%;
+            top: 37.5%;
+            left: 37.5%;
+            border-color: #888;
+            background: #16162a;
+            flex-direction: column;
+        }
+        
+        .ring-label {
+            position: absolute;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+        
+        .label-outer {
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+        }
+        
+        .label-middle {
+            top: 50%;
+            right: -120px;
+            transform: translateY(-50%);
+            color: #4ECDC4;
+        }
+        
+        .label-inner {
+            bottom: 50%;
+            right: -120px;
+            transform: translateY(50%);
+            color: #E74C3C;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .center-text .key {
+            font-size: 32px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .center-text .type {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .chord-example {
+            position: absolute;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        
+        .chord-text {
+            font-size: 18px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .chord-degree {
+            font-size: 11px;
+            vertical-align: sub;
+            margin-left: 2px;
+            opacity: 0.8;
+        }
+        
+        .chord-selected {
+            background: #FFD700;
+            color: #0f0f1e;
+        }
+        
+        .chord-selected .chord-degree {
+            color: #0f0f1e;
+        }
+        
+        .chord-major {
+            background: rgba(255, 215, 0, 0.3);
+            color: #FFD700;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+        }
+        
+        .chord-minor {
+            background: rgba(78, 205, 196, 0.3);
+            color: #4ECDC4;
+            border: 2px solid rgba(78, 205, 196, 0.5);
+        }
+        
+        .chord-dim {
+            background: rgba(231, 76, 60, 0.3);
+            color: #E74C3C;
+            border: 2px solid rgba(231, 76, 60, 0.5);
+        }
+        
+        .example-1 { top: 5%; left: 50%; transform: translateX(-50%); }
+        .example-2 { top: 20%; right: 10%; }
+        .example-3 { top: 20%; left: 10%; }
+        .example-4 { top: 45%; left: 20%; }
+        .example-5 { top: 45%; right: 20%; }
+        .example-6 { top: 65%; right: 25%; }
+        .example-7 { top: 55%; left: 35%; }
+        
+        .legend {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+        }
+        
+        .legend h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .legend-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .legend-text {
+            flex: 1;
+        }
+        
+        .legend-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #FFD700;
+        }
+        
+        .legend-text span {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        
+        .changes {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #2d2d44;
+            margin-bottom: 40px;
+        }
+        
+        .changes h2 {
+            margin-bottom: 20px;
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        
+        .change-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #FFD700;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .change-item h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .change-item p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .change-item ul {
+            margin-top: 10px;
+            margin-left: 20px;
+            color: #ccc;
+        }
+        
+        .change-item li {
+            margin-bottom: 5px;
+        }
+        
+        .approval {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid #2ECC71;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .approval h3 {
+            color: #2ECC71;
+            margin-bottom: 10px;
+        }
+        
+        .approval p {
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+        
+        .approval code {
+            background: rgba(46, 204, 113, 0.2);
+            padding: 5px 15px;
+            border-radius: 5px;
+            color: #2ECC71;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .feature-highlight {
+            background: rgba(78, 205, 196, 0.1);
+            border: 2px solid #4ECDC4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-highlight h3 {
+            color: #4ECDC4;
+            margin-bottom: 15px;
+        }
+        
+        .chord-demo {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎸 Circle of Fifths - Концептуальная схема</h1>
+        <p class="subtitle">Проект для согласования перед реализацией</p>
+        
+        <div class="main-content">
+            <div class="circle-section">
+                <h2>🎯 Структура круга (концепт)</h2>
+                <div class="circle-concept">
+                    <!-- Внешнее кольцо -->
+                    <div class="ring ring-outer">
+                        <div class="ring-label label-outer">Внешнее: Мажорные аккорды</div>
+                    </div>
+                    
+                    <!-- Среднее кольцо -->
+                    <div class="ring ring-middle">
+                        <div class="ring-label label-middle">Среднее: Минорные аккорды</div>
+                    </div>
+                    
+                    <!-- Внутреннее кольцо -->
+                    <div class="ring ring-inner">
+                        <div class="ring-label label-inner">Внутреннее: Уменьшённые аккорды</div>
+                    </div>
+                    
+                    <!-- Центр -->
+                    <div class="ring ring-center">
+                        <div class="center-text">
+                            <div class="key">A</div>
+                            <div class="type">Major</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Примеры аккордов с подстрочными римскими цифрами (в той же строке) -->
+                    <div class="chord-example chord-selected example-1">
+                        <span class="chord-text">A<span class="chord-degree">I</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-major example-2">
+                        <span class="chord-text">D<span class="chord-degree">IV</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-major example-3">
+                        <span class="chord-text">E<span class="chord-degree">V</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-minor example-4">
+                        <span class="chord-text">Bm<span class="chord-degree">ii</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-minor example-5">
+                        <span class="chord-text">C#m<span class="chord-degree">iii</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-minor example-6">
+                        <span class="chord-text">F#m<span class="chord-degree">vi</span></span>
+                    </div>
+                    
+                    <div class="chord-example chord-dim example-7">
+                        <span class="chord-text">G#°<span class="chord-degree">vii°</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="legend">
+                <h2>🎨 Цветовая схема подсветки</h2>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FFD700;"></div>
+                    <div class="legend-text">
+                        <strong>Ярко-жёлтый</strong>
+                        <span>Выбранный аккорд (тоника) - ступень I</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(255, 215, 0, 0.3); border: 2px solid rgba(255, 215, 0, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-жёлтый</strong>
+                        <span>Мажорные аккорды гаммы (IV, V ступени)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(78, 205, 196, 0.3); border: 2px solid rgba(78, 205, 196, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-бирюзовый</strong>
+                        <span>Минорные аккорды гаммы (ii, iii, vi ступени)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(231, 76, 60, 0.3); border: 2px solid rgba(231, 76, 60, 0.5);"></div>
+                    <div class="legend-text">
+                        <strong>Прозрачно-красный</strong>
+                        <span>Уменьшённый аккорд гаммы (vii° ступень)</span>
+                    </div>
+                </div>
+                
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #2d2d44; border: 2px solid #3d3d5c;"></div>
+                    <div class="legend-text">
+                        <strong>Тёмно-серый</strong>
+                        <span>Аккорды вне текущей гаммы</span>
+                    </div>
+                </div>
+                
+                <div class="feature-highlight">
+                    <h3>✨ Подстрочные римские цифры</h3>
+                    <p style="color: #ccc; line-height: 1.6; margin-bottom: 15px;">
+                        Римские цифры отображаются <strong>подстрочным шрифтом</strong> (меньшим размером) <strong>в той же строке</strong>, что и обозначение аккорда:
+                    </p>
+                    <div style="text-align: center; font-size: 24px; margin: 20px 0;">
+                        <span style="margin: 0 15px;">A<sub style="font-size: 14px; opacity: 0.7;">I</sub></span>
+                        <span style="margin: 0 15px;">D<sub style="font-size: 14px; opacity: 0.7;">IV</sub></span>
+                        <span style="margin: 0 15px;">Bm<sub style="font-size: 14px; opacity: 0.7;">ii</sub></span>
+                        <span style="margin: 0 15px;">G#°<sub style="font-size: 14px; opacity: 0.7;">vii°</sub></span>
+                    </div>
+                    <p style="color: #aaa; margin-top: 15px; font-size: 0.9em;">
+                        Название аккорда и римская цифра — в одной строке<br>
+                        Римская цифра отображается подстрочным шрифтом (меньше и ниже)
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="changes">
+            <h2>📋 Планируемые изменения</h2>
+            
+            <div class="change-item">
+                <h3>1. Три концентрических кольца</h3>
+                <p>
+                    Круг состоит из трёх колец:
+                </p>
+                <ul>
+                    <li><strong>Внешнее</strong> — мажорные аккорды (C, G, D, A, E, B, F#, Db, Ab, Eb, Bb, F)</li>
+                    <li><strong>Среднее</strong> — минорные аккорды (Am, Em, Bm, F#m, C#m, G#m, D#m, Bbm, Fm, Cm, Gm, Dm)</li>
+                    <li><strong>Внутреннее</strong> — уменьшённые аккорды (B°, F#°, C#°, G#°, D#°, A#°, F°, C°, G°, D°, A°, E°)</li>
+                </ul>
+            </div>
+            
+            <div class="change-item">
+                <h3>2. Подстрочные римские цифры</h3>
+                <p>
+                    В каждом секторе круга для аккордов, входящих в выбранную тональность:
+                </p>
+                <ul>
+                    <li>Название аккорда и римская цифра — <strong>в одной строке</strong></li>
+                    <li>Римская цифра отображается подстрочным шрифтом (меньше и ниже)</li>
+                    <li>Пример: A<sub style="font-size: 0.7em; opacity: 0.7;">I</sub>, D<sub style="font-size: 0.7em; opacity: 0.7;">IV</sub>, Bm<sub style="font-size: 0.7em; opacity: 0.7;">ii</sub></li>
+                </ul>
+            </div>
+            
+            <div class="change-item">
+                <h3>3. Синхронизация подсветки</h3>
+                <p>
+                    При выборе аккорда подсветка в круге синхронизируется с подсветкой в списке диатонических аккордов.
+                </p>
+            </div>
+            
+            <div class="change-item">
+                <h3>4. Поворот для минорных аккордов</h3>
+                <p>
+                    При выборе минорного аккорда как тоники, круг поворачивается так, чтобы этот аккорд оказался на позиции 12 часов.
+                </p>
+            </div>
+        </div>
+        
+        <div class="approval">
+            <h3>✅ Подтверждение согласования</h3>
+            <p>Если концепция верна, напишите:</p>
+            <code>согласовано</code>
+            <p style="margin-top: 15px; font-size: 0.9em;">
+                После этого я начну реализацию изменений в коде
+            </p>
+        </div>
+    </div>
+</body>
+</html>
