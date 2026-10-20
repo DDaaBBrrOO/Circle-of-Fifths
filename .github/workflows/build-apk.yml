@@ -126,7 +126,7 @@ jobs:
             echo "✅ Custom gradle.properties applied"
           fi
 
-      # 12. Fix common Capacitor issues
+      # 12. Fix common Capacitor issues and Kotlin conflicts
       - name: 🔧 Fix common Capacitor issues
         run: |
           cd android
@@ -159,12 +159,34 @@ jobs:
           # Fix: Ensure namespace is set (required for AGP 8+)
           if ! grep -q "namespace" app/build.gradle 2>/dev/null && ! grep -q "namespace" app/build.gradle.kts 2>/dev/null; then
             echo "⚠️  namespace not found, adding it"
-            # Add namespace to app/build.gradle
             if [ -f "app/build.gradle" ]; then
               sed -i '/android {/a\    namespace "com.circleoffifths.guitar"' app/build.gradle
             fi
           else
             echo "✅ namespace found"
+          fi
+          
+          # Fix: Resolve Kotlin stdlib duplicate classes conflict
+          # Starting from Kotlin 1.8, jdk7 and jdk8 modules were merged into main kotlin-stdlib
+          # But some dependencies still pull old versions, causing duplicate class errors
+          echo ""
+          echo "=== Fixing Kotlin stdlib conflicts ==="
+          
+          if [ -f "app/build.gradle" ]; then
+            # Add resolution strategy to force consistent Kotlin versions
+            # and exclude old jdk7/jdk8 modules
+            cat >> app/build.gradle << 'EOF'
+
+// Fix Kotlin stdlib duplicate classes conflict
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+    }
+}
+EOF
+            echo "✅ Kotlin stdlib conflict resolution added"
           fi
           
           echo "✅ Common issues check completed"

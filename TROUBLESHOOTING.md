@@ -35,6 +35,52 @@ sdk use java 21.0.2-zulu
 
 ---
 
+## Ошибка: `Duplicate class kotlin.collections.jdk8.CollectionsJDK8Kt`
+
+### Проблема
+```
+Execution failed for task ':app:checkDebugDuplicateClasses'.
+Duplicate class kotlin.collections.jdk8.CollectionsJDK8Kt found in modules 
+kotlin-stdlib-1.8.22.jar and kotlin-stdlib-jdk8-1.6.21.jar
+```
+
+### Причина
+Начиная с Kotlin 1.8, модули `kotlin-stdlib-jdk7` и `kotlin-stdlib-jdk8` были объединены в основной `kotlin-stdlib`. Однако некоторые зависимости всё ещё подтягивают старые версии (1.6.21), что вызывает конфликт дублирующихся классов.
+
+### Решение
+Добавьте в `android/app/build.gradle` принудительное разрешение версий:
+
+```gradle
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+    }
+}
+```
+
+**Автоматическое исправление:** Workflow теперь автоматически добавляет этот блок после `npx cap add android`.
+
+### Локальная разработка
+Если вы разрабатываете локально, добавьте этот блок в `android/app/build.gradle` вручную или выполните:
+
+```bash
+cd android
+cat >> app/build.gradle << 'EOF'
+
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.24'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24'
+    }
+}
+EOF
+```
+
+---
+
 ## Ошибка: Gradle build failed
 
 ### Проблема: `BUILD FAILED in 56s`
