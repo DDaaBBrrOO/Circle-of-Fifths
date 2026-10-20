@@ -2,24 +2,22 @@
 
 ## Автоматическая установка (GitHub Actions)
 
-При сборке через GitHub Actions иконка устанавливается автоматически из файла `public/icon.svg`.
+При сборке через GitHub Actions иконка устанавливается автоматически из файла `public/icon.svg` с использованием Node.js библиотеки `sharp`.
 
 ## Локальная установка
 
 ### Вариант 1: Использование скрипта (рекомендуется)
 
 ```bash
-# Установите необходимые инструменты
-# Ubuntu/Debian:
-sudo apt-get install librsvg2-bin
-
-# macOS:
-brew install librsvg
+# Убедитесь, что зависимости установлены
+npm install
 
 # Запустите скрипт установки
 chmod +x scripts/setup-icon.sh
 ./scripts/setup-icon.sh
 ```
+
+Скрипт использует Node.js библиотеку `sharp` для конвертации SVG в PNG, поэтому не требует установки системных утилит.
 
 ### Вариант 2: Ручная установка
 
@@ -102,7 +100,22 @@ cd android
 
 ## Альтернативные инструменты
 
+### Ручная генерация через Node.js
+
+Если вы хотите сгенерировать иконки вручную:
+
+```bash
+node scripts/generate-icons.js
+```
+
+Этот скрипт:
+- Конвертирует `public/icon.svg` в PNG для всех плотностей экрана
+- Создаёт обычные и круглые иконки
+- Настраивает Adaptive Icon конфигурацию
+
 ### Онлайн-генераторы иконок
+
+Если вы предпочитаете онлайн-инструменты:
 
 - [Android Asset Studio](https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html)
 - [App Icon Generator](https://appicon.co/)
@@ -115,9 +128,26 @@ cd android
 Если у вас есть исходник в Figma:
 1. Экспортируйте в SVG
 2. Сохраните в `public/icon.svg`
-3. Запустите скрипт установки
+3. Запустите `node scripts/generate-icons.js`
 
 ## Устранение неполадок
+
+### Ошибка: "Cannot find module 'sharp'"
+
+Убедитесь, что зависимости установлены:
+```bash
+npm install
+```
+
+Если проблема сохраняется, переустановите sharp:
+```bash
+npm uninstall sharp
+npm install sharp
+```
+
+### Ошибка: "Source icon not found at public/icon.svg"
+
+Убедитесь, что файл `public/icon.svg` существует. Если нет, создайте его или скачайте из репозитория.
 
 ### Иконка не отображается
 
